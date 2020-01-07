@@ -23,7 +23,7 @@ from __future__ import print_function, unicode_literals
 import datetime
 
 from dateutil import tz
-from index import BaseHandler
+from .index import BaseHandler
 from tornado.web import authenticated
 
 import sickbeard

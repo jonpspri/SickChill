@@ -22,8 +22,8 @@ from __future__ import print_function, unicode_literals
 
 import os
 
-from api import ApiHandler, KeyHandler
-from routes import Route
+from .api import ApiHandler, KeyHandler
+from .routes import Route
 from tornado.web import RedirectHandler, StaticFileHandler, url
 
 import sickbeard

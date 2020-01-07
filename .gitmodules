@@ -1,3 +1,18 @@
 [submodule "submodules/bencode.py"]
 	path = submodules/bencode.py
 	url = https://github.com/fuzeman/bencode.py.git
+[submodule "submodules/adba"]
+	path = submodules/adba
+	url = https://github.com/jonpspri/adba.git
+	branch = python3
+[submodule "submodules/python-fanart"]
+	path = submodules/python-fanart
+	url = https://github.com/jonpspri/python-fanart.git
+	branch = python3
+[submodule "submodules/tvdb_api"]
+	path = submodules/tvdb_api
+	url = https://github.com/jonpspri/tvdb_api.git
+	branch = python3
+[submodule "submodules/feedparser"]
+	path = submodules/feedparser
+	url = https://github.com/kurtmckee/feedparser.git

@@ -20,9 +20,9 @@
 
 from __future__ import print_function, unicode_literals
 
-from common import PageTemplate
-from index import WebRoot
-from routes import Route
+from .common import PageTemplate
+from .index import WebRoot
+from .routes import Route
 from tornado.web import addslash
 
 import sickbeard

@@ -28,12 +28,12 @@ from operator import attrgetter
 
 import adba
 import six
-from common import PageTemplate
+from .common import PageTemplate
 from github.GithubException import GithubException
-from index import WebRoot
+from .index import WebRoot
 from libtrakt import TraktAPI
 from requests.compat import unquote_plus
-from routes import Route
+from .routes import Route
 from six.moves import urllib
 from tornado.escape import xhtml_unescape
 

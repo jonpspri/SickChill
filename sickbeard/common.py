@@ -43,7 +43,7 @@ from sickchill.helper.encoding import ek
 from sickchill.recompiled import tags
 from sickchill.tagger.episode import EpisodeTags
 
-gettext.install('messages', unicode=1, codeset='UTF-8', names=["ngettext"])
+gettext.install('messages', codeset='UTF-8', names=["ngettext"])
 
 # If some provider has an issue with functionality of SR, other than user agents, it's best to come talk to us rather than block.
 # It is no different than us going to a provider if we have questions or issues. Be a team player here.

@@ -27,7 +27,7 @@ import re
 import fanart as fanart_module
 import six
 from fanart.core import Request as fanartRequest
-from tmdb_api.tmdb_api import TMDB
+from tmdbsimple.base import TMDB
 
 import sickbeard
 from sickbeard import helpers, logger

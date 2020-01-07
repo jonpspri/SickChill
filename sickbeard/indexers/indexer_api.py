@@ -22,7 +22,7 @@ from __future__ import unicode_literals
 
 import os
 
-from indexer_config import indexerConfig, initConfig
+from .indexer_config import indexerConfig, initConfig
 
 import sickbeard
 from sickchill.helper.common import try_int

@@ -22,9 +22,9 @@ from __future__ import print_function, unicode_literals
 
 import os.path
 
-from hachoir_core.log import log
-from hachoir_metadata import extractMetadata
-from hachoir_parser import createParser
+from hachoir.core.log import log
+from hachoir.metadata import extractMetadata
+from hachoir.parser import createParser
 
 import sickbeard
 from sickbeard import helpers, logger

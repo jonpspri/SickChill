@@ -22,8 +22,8 @@ from __future__ import print_function, unicode_literals
 
 import traceback
 
-from common import PageTemplate
-from index import BaseHandler
+from .common import PageTemplate
+from .index import BaseHandler
 from tornado.web import RequestHandler
 
 import sickbeard

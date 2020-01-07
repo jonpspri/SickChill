@@ -21,9 +21,9 @@
 from __future__ import print_function, unicode_literals
 
 import markdown2
-from common import PageTemplate
-from home import Home
-from routes import Route
+from .common import PageTemplate
+from .home import Home
+from .routes import Route
 
 from sickbeard import helpers, logger
 

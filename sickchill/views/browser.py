@@ -22,8 +22,8 @@ from __future__ import print_function, unicode_literals
 
 import os
 
-from index import WebRoot
-from routes import Route
+from .index import WebRoot
+from .routes import Route
 from tornado.escape import xhtml_unescape
 
 from sickbeard.browser import foldersAtPath

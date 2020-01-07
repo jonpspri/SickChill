@@ -25,7 +25,8 @@ import socket
 import time
 from datetime import datetime
 
-import jsonrpclib
+#import jsonrpclib
+import requests
 import six
 
 import sickbeard
@@ -132,6 +133,8 @@ class BTNProvider(TorrentProvider):
         return results
 
     def _api_call(self, apikey, params=None, results_per_page=1000, offset=0):
+
+        # TO-DO:  Convert this to use requests_exception
 
         server = jsonrpclib.Server(self.urls['base_url'])
         parsed_json = {}

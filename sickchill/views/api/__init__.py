@@ -20,8 +20,8 @@
 
 from __future__ import print_function, unicode_literals
 
-from authentication import KeyHandler
-from webapi import (ApiCall, ApiError, ApiHandler, CMDBacklog, CMDComingEpisodes, CMDDailySearch, CMDEpisode, CMDEpisodeSearch, CMDEpisodeSetStatus,
+from .authentication import KeyHandler
+from .webapi import (ApiCall, ApiError, ApiHandler, CMDBacklog, CMDComingEpisodes, CMDDailySearch, CMDEpisode, CMDEpisodeSearch, CMDEpisodeSetStatus,
                     CMDExceptions, CMDFailed, CMDFullSubtitleSearch, CMDHelp, CMDHistory, CMDHistoryClear, CMDHistoryTrim, CMDLogs, CMDLogsClear,
                     CMDPostProcess, CMDProperSearch, CMDShow, CMDShowAddExisting, CMDShowAddNew, CMDShowCache, CMDShowDelete, CMDShowGetBanner,
                     CMDShowGetFanArt, CMDShowGetNetworkLogo, CMDShowGetPoster, CMDShowGetQuality, CMDShowPause, CMDShowRefresh, CMDShows, CMDShowSeasonList,

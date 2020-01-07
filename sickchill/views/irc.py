@@ -20,9 +20,9 @@
 
 from __future__ import print_function, unicode_literals
 
-from common import PageTemplate
-from home import Home
-from routes import Route
+from .common import PageTemplate
+from .home import Home
+from .routes import Route
 
 try:
     import json

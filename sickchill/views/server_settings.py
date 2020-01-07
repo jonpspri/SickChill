@@ -6,7 +6,7 @@ import os
 import threading
 from socket import errno, error as socket_error
 
-from routes import Route
+from .routes import Route
 from tornado.ioloop import IOLoop
 from tornado.web import Application, RedirectHandler, StaticFileHandler, url
 

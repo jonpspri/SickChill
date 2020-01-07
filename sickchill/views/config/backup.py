@@ -23,7 +23,7 @@ from __future__ import print_function, unicode_literals
 import os
 import time
 
-from index import Config
+from .index import Config
 from tornado.web import addslash
 
 import sickbeard

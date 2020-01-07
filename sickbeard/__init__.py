@@ -42,7 +42,8 @@ from sickbeard.config import check_section, check_setting_bool, check_setting_fl
 from sickbeard.databases import cache_db, failed_db, mainDB
 from sickbeard.indexers import indexer_api
 from sickbeard.indexers.indexer_exceptions import (indexer_attributenotfound, indexer_episodenotfound, indexer_error, indexer_exception, indexer_seasonnotfound,
-                                                   indexer_showincomplete, indexer_shownotfound, indexer_userabort)
+                                                   #indexer_showincomplete,
+                                                   indexer_shownotfound, indexer_userabort)
 from sickbeard.numdict import NumDict
 from sickbeard.providers.newznab import NewznabProvider
 from sickbeard.providers.rsstorrent import TorrentRssProvider
@@ -51,7 +52,7 @@ from sickchill.helper.encoding import ek
 from sickchill.helper.exceptions import ex
 from sickchill.system.Shutdown import Shutdown
 
-gettext.install('messages', unicode=1, codeset='UTF-8', names=["ngettext"])
+gettext.install('messages', codeset='UTF-8', names=["ngettext"])
 
 # Some strings come from metadata or libraries or 3rd party sites,
 # So we need to pre-define them to get translations for them

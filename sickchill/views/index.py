@@ -30,8 +30,8 @@ from mimetypes import guess_type
 from operator import attrgetter
 
 import six
-from api.webapi import function_mapper
-from common import PageTemplate
+from .api.webapi import function_mapper
+from .common import PageTemplate
 from mako.lookup import Template
 from requests.compat import urljoin
 from tornado.concurrent import run_on_executor
