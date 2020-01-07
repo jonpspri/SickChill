@@ -87,7 +87,7 @@ MY_FULLNAME = None
 LOCALE_DIR = 'locale'
 MY_NAME = None
 MY_ARGS = []
-SYS_ENCODING = ''
+#SYS_ENCODING = ''
 DATA_DIR = ''
 CREATEPID = False
 PIDFILE = ''
@@ -893,9 +893,9 @@ def initialize(consoleLogging=True):  # pylint: disable=too-many-locals, too-man
         GUI_LANG = check_setting_str(CFG, 'GUI', 'language')
 
         if GUI_LANG:
-            gettext.translation('messages', LOCALE_DIR, languages=[GUI_LANG], codeset='UTF-8').install(unicode=1, names=["ngettext"])
+            gettext.translation('messages', LOCALE_DIR, languages=[GUI_LANG], codeset='UTF-8').install(names=["ngettext"])
         else:
-            gettext.install('messages', LOCALE_DIR, unicode=1, codeset='UTF-8', names=["ngettext"])
+            gettext.install('messages', LOCALE_DIR, codeset='UTF-8', names=["ngettext"])
 
         load_gettext_translations(LOCALE_DIR, 'messages')
 

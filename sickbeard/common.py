@@ -39,7 +39,6 @@ from six.moves import reduce
 import sickbeard
 from sickbeard.numdict import NumDict
 from sickchill.helper import video_screen_size
-from sickchill.helper.encoding import ek
 from sickchill.recompiled import tags
 from sickchill.tagger.episode import EpisodeTags
 
@@ -51,7 +50,7 @@ gettext.install('messages', codeset='UTF-8', names=["ngettext"])
 SPOOF_USER_AGENT = False
 INSTANCE_ID = str(uuid.uuid1())
 USER_AGENT = ('SickChill.CE.1/(' + platform.system() + '; ' + platform.release() + '; ' + INSTANCE_ID + ')')
-UA_SETTINGS.DB = ek(path.abspath, ek(path.join, ek(path.dirname, __file__), '../lib/fake_useragent/ua.json'))
+UA_SETTINGS.DB = path.abspath(path.join(path.dirname(__file__), '../lib/fake_useragent/ua.json'))
 UA_POOL = UserAgent()
 if SPOOF_USER_AGENT:
     USER_AGENT = UA_POOL.random
@@ -308,7 +307,7 @@ class Quality(object):
         if not name:
             return Quality.UNKNOWN
 
-        name = ek(path.basename, name)
+        name = path.basename(name)
 
         result = None
         ep = EpisodeTags(name)
@@ -439,7 +438,9 @@ class Quality(object):
         if status == UNKNOWN:
             return UNKNOWN, Quality.UNKNOWN
 
-        for q in sorted(Quality.qualityStrings.keys(), reverse=True):
+        for q in sorted(Quality.qualityStrings.keys(),
+                        key=lambda x : -1 if x is None else x,
+                        reverse=True):
             if status > q * 100:
                 return status - q * 100, q
 

@@ -2104,6 +2104,7 @@ class TVEpisode(object):  # pylint: disable=too-many-instance-attributes, too-ma
                 return ''
 
             try:
+                logger.log("tv.py:_replace map - Parsing {0}".format(name), logger.DEBUG)
                 parse_result = NameParser(name, showObj=show, naming_pattern=True).parse(name)
             except (InvalidNameException, InvalidShowException) as error:
                 logger.log("Unable to get parse release_group: {0}".format(error), logger.DEBUG)

@@ -112,10 +112,10 @@ class ConfigGeneral(Config):
         if gui_language != sickbeard.GUI_LANG:
             if gui_language:
                 # Selected language
-                gettext.translation('messages', sickbeard.LOCALE_DIR, languages=[gui_language], codeset='UTF-8').install(unicode=1, names=["ngettext"])
+                gettext.translation('messages', sickbeard.LOCALE_DIR, languages=[gui_language], codeset='UTF-8').install(names=["ngettext"])
             else:
                 # System default language
-                gettext.install('messages', sickbeard.LOCALE_DIR, unicode=1, codeset='UTF-8', names=["ngettext"])
+                gettext.install('messages', sickbeard.LOCALE_DIR, codeset='UTF-8', names=["ngettext"])
 
             sickbeard.GUI_LANG = gui_language
 

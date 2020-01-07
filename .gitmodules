@@ -1,5 +1,5 @@
 [submodule "submodules/bencode.py"]
-	path = submodules/bencode.py
+	path = submodules/bencode
 	url = https://github.com/fuzeman/bencode.py.git
 [submodule "submodules/adba"]
 	path = submodules/adba

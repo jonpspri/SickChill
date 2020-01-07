@@ -43,7 +43,6 @@ from tornado.web import authenticated, HTTPError, RequestHandler
 
 import sickbeard
 from sickbeard import db, helpers, logger, network_timezones, ui
-from sickbeard.common import ek
 from sickchill.media.ShowBanner import ShowBanner
 from sickchill.media.ShowFanArt import ShowFanArt
 from sickchill.media.ShowNetworkLogo import ShowNetworkLogo
@@ -355,7 +354,7 @@ class UI(WebRoot):
 
     def locale_json(self):
         """ Get /locale/{lang_code}/LC_MESSAGES/messages.json """
-        locale_file = ek(os.path.normpath, '{locale_dir}/{lang}/LC_MESSAGES/messages.json'.format(
+        locale_file = os.path.normpath('{locale_dir}/{lang}/LC_MESSAGES/messages.json'.format(
             locale_dir=sickbeard.LOCALE_DIR, lang=sickbeard.GUI_LANG))
 
         if os.path.isfile(locale_file):
@@ -410,14 +409,14 @@ class UI(WebRoot):
         return sickbeard.SITE_MESSAGES
 
     def sickchill_background(self):
-        if sickbeard.SICKCHILL_BACKGROUND_PATH and ek(os.path.isfile, sickbeard.SICKCHILL_BACKGROUND_PATH):
+        if sickbeard.SICKCHILL_BACKGROUND_PATH and os.path.isfile(sickbeard.SICKCHILL_BACKGROUND_PATH):
             self.set_header(b'Content-Type', guess_type(sickbeard.SICKCHILL_BACKGROUND_PATH)[0])
             with open(sickbeard.SICKCHILL_BACKGROUND_PATH, 'rb') as content:
                 return content.read()
         return None
 
     def custom_css(self):
-        if sickbeard.CUSTOM_CSS_PATH and ek(os.path.isfile, sickbeard.CUSTOM_CSS_PATH):
+        if sickbeard.CUSTOM_CSS_PATH and os.path.isfile(sickbeard.CUSTOM_CSS_PATH):
             self.set_header(b'Content-Type', 'text/css')
             with open(sickbeard.CUSTOM_CSS_PATH, 'r') as content:
                 return content.read()

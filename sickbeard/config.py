@@ -820,7 +820,7 @@ def check_setting_float(config, cfg_name, item_name, def_val=0.0, min_val=None, 
 ################################################################################
 # check_setting_str                                                            #
 ################################################################################
-def check_setting_str(config, cfg_name, item_name, def_val=six.text_type(''), silent=True, censor_log=False):
+def check_setting_str(config, cfg_name, item_name, def_val='', silent=True, censor_log=False):
     """
     Checks config setting of string types
 
@@ -835,9 +835,9 @@ def check_setting_str(config, cfg_name, item_name, def_val=six.text_type(''), si
 
     :return: decrypted value of `config[cfg_name][item_name]`
              or `def_val` (see cases of def_val)
-    :rtype: six.text_type
+    :rtype: str
     """
-    if not isinstance(def_val, six.string_types):
+    if not isinstance(def_val, str):
         logger.log(
             "{dom}:{key} default value is not the correct type. Expected {t}, got {dt}".format(
                 dom=cfg_name, key=item_name, t='string', dt=type(def_val)), logger.ERROR)
@@ -850,7 +850,7 @@ def check_setting_str(config, cfg_name, item_name, def_val=six.text_type(''), si
             raise ValueError
 
         my_val = helpers.decrypt(config[cfg_name][item_name], encryption_version)
-        if six.text_type(my_val) == six.text_type(None) or not six.text_type(my_val):
+        if not my_val:
             raise ValueError
     except (ValueError, IndexError, KeyError):
         my_val = def_val
@@ -860,13 +860,13 @@ def check_setting_str(config, cfg_name, item_name, def_val=six.text_type(''), si
 
         config[cfg_name][item_name] = helpers.encrypt(my_val, encryption_version)
 
-    if (censor_log or (cfg_name, item_name) in six.iteritems(logger.censored_items)) and not item_name.endswith('custom_url'):
+    if (censor_log or ((cfg_name, item_name) in logger.censored_items)) and not item_name.endswith('custom_url'):
         logger.censored_items[cfg_name, item_name] = my_val
 
     if not silent:
         logger.log(item_name + " -> " + my_val, logger.DEBUG)
 
-    return six.text_type(my_val)
+    return my_val
 
 
 ################################################################################

@@ -33,7 +33,6 @@ import sickbeard
 from sickbeard import common, db, helpers, logger, scene_exceptions, scene_numbering
 from sickbeard.name_parser import regexes
 from sickchill.helper.common import remove_extension
-from sickchill.helper.encoding import ek
 from sickchill.helper.exceptions import ex
 
 
@@ -112,6 +111,7 @@ class NameParser(object):
         bestResult = None
 
         for (cur_regex_num, cur_regex_name, cur_regex) in self.compiled_regexes:
+            logger.log("_parse_string - Matching string {0}".format(name), logger.DEBUG)
             match = cur_regex.match(name)
 
             if not match:
@@ -420,7 +420,7 @@ class NameParser(object):
             return cached
 
         # break it into parts if there are any (dirname, file name, extension)
-        dir_name, file_name = ek(os.path.split, name)
+        dir_name, file_name = os.path.split(name)
 
         if self.file_name:
             base_file_name = remove_extension(file_name)
@@ -431,10 +431,11 @@ class NameParser(object):
         final_result = ParseResult(name)
 
         # try parsing the file name
+        logger.log("parser.py:parse - Parsing string {0}".format(base_file_name), logger.DEBUG)
         file_name_result = self._parse_string(base_file_name, skip_scene_detection)
 
         # use only the direct parent dir
-        dir_name = ek(os.path.basename, dir_name)
+        dir_name = os.path.basename(dir_name)
 
         # parse the dirname for extra info if needed
         dir_name_result = self._parse_string(dir_name, skip_scene_detection)
@@ -472,17 +473,17 @@ class NameParser(object):
 
         if not final_result.show:
             raise InvalidShowException("Unable to match {0} to a show in your database. Parser result: {1}".format(
-                name, six.text_type(final_result)))
+                name, final_result))
 
         # if there's no useful info in it then raise an exception
         if final_result.season_number is None and not final_result.episode_numbers and final_result.air_date is None and not final_result.ab_episode_numbers and not final_result.series_name:
             raise InvalidNameException("Unable to parse {0} to a valid episode of {1}. Parser result: {2}".format(
-                name, final_result.show.name, six.text_type(final_result)))
+                name, final_result.show.name, final_result))
 
         if cache_result:
             name_parser_cache.add(name, final_result)
 
-        logger.log("Parsed " + name + " into " + six.text_type(final_result), logger.DEBUG)
+        logger.log("Parsed {0} into {1}".format(name, final_result), logger.DEBUG)
         return final_result
 
 
@@ -566,8 +567,8 @@ class ParseResult(object):  # pylint: disable=too-many-instance-attributes
 
         return to_return
 
-    def __str__(self):
-        return self.__unicode__().encode('utf-8', errors='replace')
+    # def __str__(self):
+    #     return self.__unicode__().encode('utf-8', errors='replace')
 
     @property
     def is_air_by_date(self):
