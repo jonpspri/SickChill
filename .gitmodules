@@ -1,0 +1,3 @@
+[submodule "submodules/bencode.py"]
+	path = submodules/bencode.py
+	url = https://github.com/fuzeman/bencode.py.git
