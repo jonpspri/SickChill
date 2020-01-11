@@ -18,7 +18,7 @@
 # You should have received a copy of the GNU General Public License
 # along with SickChill. If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import print_function, unicode_literals
+#
 
 import datetime
 import os
@@ -28,8 +28,7 @@ import sickbeard
 from sickbeard import helpers, logger
 from sickbeard.metadata import generic
 from sickchill.helper.common import dateFormat, replace_extension
-from sickchill.helper.encoding import ek
-from sickchill.helper.exceptions import ex, ShowNotFoundException
+from sickchill.helper.exceptions import ShowNotFoundException
 
 try:
     import xml.etree.cElementTree as etree
@@ -129,7 +128,7 @@ class WDTVMetadata(generic.GenericMetadata):
 
         ep_obj: a TVEpisode instance for which to create the thumbnail
         """
-        if ek(os.path.isfile, ep_obj.location):
+        if os.path.isfile(ep_obj.location):
             tbn_filename = replace_extension(ep_obj.location, 'metathumb')
         else:
             return None
@@ -144,8 +143,8 @@ class WDTVMetadata(generic.GenericMetadata):
         If no season folder exists, None is returned
         """
 
-        dir_list = [x for x in ek(os.listdir, show_obj.location) if
-                    ek(os.path.isdir, ek(os.path.join, show_obj.location, x))]
+        dir_list = [x for x in os.listdir(show_obj.location) if
+                    os.path.isdir(os.path.join(show_obj.location, x))]
 
         season_dir_regex = r'^Season\s+(\d+)$'
 
@@ -172,7 +171,7 @@ class WDTVMetadata(generic.GenericMetadata):
 
         logger.log("Using " + str(season_dir) + "/folder.jpg as season dir for season " + str(season), logger.DEBUG)
 
-        return ek(os.path.join, show_obj.location, season_dir, 'folder.jpg')
+        return os.path.join(show_obj.location, season_dir, 'folder.jpg')
 
     def _ep_data(self, ep_obj):
         """
@@ -202,7 +201,7 @@ class WDTVMetadata(generic.GenericMetadata):
             raise ShowNotFoundException(e.message)
         except sickbeard.indexer_error as e:
             logger.log("Unable to connect to " + sickbeard.indexerApi(
-                ep_obj.show.indexer).name + " while creating meta files - skipping - " + ex(e), logger.ERROR)
+                ep_obj.show.indexer).name + " while creating meta files - skipping - " + repr(e), logger.ERROR)
             return False
 
         rootNode = etree.Element("details")
@@ -215,8 +214,8 @@ class WDTVMetadata(generic.GenericMetadata):
             except (sickbeard.indexer_episodenotfound, sickbeard.indexer_seasonnotfound):
                 logger.log("Metadata writer is unable to find episode {0:d}x{1:d} of {2} on {3}..."
                            "has it been removed? Should I delete from db?".format(
-                    curEpToWrite.season, curEpToWrite.episode, curEpToWrite.show.name,
-                    sickbeard.indexerApi(ep_obj.show.indexer).name))
+                                curEpToWrite.season, curEpToWrite.episode, curEpToWrite.show.name,
+                                sickbeard.indexerApi(ep_obj.show.indexer).name))
                 return None
 
             if ep_obj.season == 0 and not getattr(myEp, 'firstaired', None):

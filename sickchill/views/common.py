@@ -18,7 +18,7 @@
 # along with SickChill. If not, see <http://www.gnu.org/licenses/>.
 # pylint: disable=abstract-method,too-many-lines, R
 
-from __future__ import print_function, unicode_literals
+#
 
 import os
 import re
@@ -32,21 +32,14 @@ from tornado.escape import linkify
 
 import sickbeard
 from sickbeard import classes, helpers
-from sickchill.helper.encoding import ek
-
-try:
-    import json
-except ImportError:
-    # noinspection PyPackageRequirements,PyUnresolvedReferences
-    import simplejson as json
 
 mako_lookup = {}
 
 
 def get_lookup():
     mako_lookup['mako'] = mako_lookup.get('mako') or TemplateLookup(
-        directories=[ek(os.path.join, sickbeard.PROG_DIR, "gui/" + sickbeard.GUI_NAME + "/views/")],
-        module_directory=ek(os.path.join, sickbeard.CACHE_DIR, 'mako'),
+        directories=[os.path.join(sickbeard.PROG_DIR, "gui/" + sickbeard.GUI_NAME + "/views/")],
+        module_directory=os.path.join(sickbeard.CACHE_DIR, 'mako'),
         strict_undefined=sickbeard.BRANCH and sickbeard.BRANCH != 'master',
         #  format_exceptions=True,
         filesystem_checks=True

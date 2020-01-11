@@ -19,7 +19,7 @@
 # You should have received a copy of the GNU General Public License
 # along with SickChill. If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import print_function, unicode_literals
+#
 
 import datetime
 import io
@@ -28,8 +28,7 @@ import os
 import sickbeard
 from sickbeard import helpers, logger
 from sickbeard.metadata import generic
-from sickchill.helper.encoding import ek
-from sickchill.helper.exceptions import ex, ShowNotFoundException
+from sickchill.helper.exceptions import ShowNotFoundException
 
 
 class TIVOMetadata(generic.GenericMetadata):
@@ -138,10 +137,10 @@ class TIVOMetadata(generic.GenericMetadata):
 
         ep_obj: a TVEpisode object to get the path for
         """
-        if ek(os.path.isfile, ep_obj.location):
-            metadata_file_name = ek(os.path.basename, ep_obj.location) + "." + self._ep_nfo_extension
-            metadata_dir_name = ek(os.path.join, ek(os.path.dirname, ep_obj.location), '.meta')
-            metadata_file_path = ek(os.path.join, metadata_dir_name, metadata_file_name)
+        if os.path.isfile(ep_obj.location):
+            metadata_file_name = os.path.basename(ep_obj.location) + "." + self._ep_nfo_extension
+            metadata_dir_name = os.path.join(os.path.dirname(ep_obj.location), '.meta')
+            metadata_file_path = os.path.join(metadata_dir_name, metadata_file_name)
         else:
             logger.log("Episode location doesn't exist: " + str(ep_obj.location), logger.DEBUG)
             return ''
@@ -197,8 +196,8 @@ class TIVOMetadata(generic.GenericMetadata):
             except (sickbeard.indexer_episodenotfound, sickbeard.indexer_seasonnotfound):
                 logger.log("Metadata writer is unable to find episode {0:d}x{1:d} of {2} on {3}..."
                            "has it been removed? Should I delete from db?".format(
-                    curEpToWrite.season, curEpToWrite.episode, curEpToWrite.show.name,
-                    sickbeard.indexerApi(ep_obj.show.indexer).name))
+                                curEpToWrite.season, curEpToWrite.episode, curEpToWrite.show.name,
+                                sickbeard.indexerApi(ep_obj.show.indexer).name))
                 return None
 
             if ep_obj.season == 0 and not getattr(myEp, 'firstaired', None):
@@ -313,12 +312,12 @@ class TIVOMetadata(generic.GenericMetadata):
             return False
 
         nfo_file_path = self.get_episode_file_path(ep_obj)
-        nfo_file_dir = ek(os.path.dirname, nfo_file_path)
+        nfo_file_dir = os.path.dirname(nfo_file_path)
 
         try:
-            if not ek(os.path.isdir, nfo_file_dir):
+            if not os.path.isdir(nfo_file_dir):
                 logger.log("Metadata dir didn't exist, creating it at " + nfo_file_dir, logger.DEBUG)
-                ek(os.makedirs, nfo_file_dir)
+                os.makedirs(nfo_file_dir)
                 helpers.chmodAsParent(nfo_file_dir)
 
             logger.log("Writing episode nfo file to " + nfo_file_path, logger.DEBUG)
@@ -330,7 +329,7 @@ class TIVOMetadata(generic.GenericMetadata):
             helpers.chmodAsParent(nfo_file_path)
 
         except EnvironmentError as e:
-            logger.log("Unable to write file to " + nfo_file_path + " - are you sure the folder is writable? " + ex(e),
+            logger.log("Unable to write file to " + nfo_file_path + " - are you sure the folder is writable? " + repr(e),
                        logger.ERROR)
             return False
 

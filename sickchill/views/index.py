@@ -18,7 +18,7 @@
 # along with SickChill. If not, see <http://www.gnu.org/licenses/>.
 # pylint: disable=abstract-method,too-many-lines, R
 
-from __future__ import print_function, unicode_literals
+#
 
 import datetime
 import os
@@ -29,7 +29,7 @@ from concurrent.futures import ThreadPoolExecutor
 from mimetypes import guess_type
 from operator import attrgetter
 
-import six
+# import six
 from .api.webapi import function_mapper
 from .common import PageTemplate
 from mako.lookup import Template
@@ -70,7 +70,7 @@ class BaseHandler(RequestHandler):
         # self.include_host = True
 
     # def set_default_headers(self):
-    #     self.set_header(b'Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+    #     self.set_header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
 
     def write_error(self, status_code, **kwargs):
         # handle 404 http errors
@@ -92,7 +92,7 @@ class BaseHandler(RequestHandler):
                                     self.request.__dict__.keys()])
             error = exc_info[1]
 
-            self.set_header(b'Content-Type', 'text/html')
+            self.set_header('Content-Type', 'text/html')
             self.finish("""<html>
                                  <title>{0}</title>
                                  <body>
@@ -166,11 +166,9 @@ class WebHandler(BaseHandler):
     def async_call(self, function):
         try:
             kwargs = self.request.arguments
-            for arg, value in six.iteritems(kwargs):
+            for arg, value in kwargs.items():
                 if len(value) == 1:
                     kwargs[arg] = xhtml_escape(value[0])
-                elif isinstance(value, six.string_types):
-                    kwargs[arg] = xhtml_escape(value)
                 elif isinstance(value, list):
                     kwargs[arg] = [xhtml_escape(v) for v in value]
                 else:
@@ -198,7 +196,7 @@ class WebRoot(WebHandler):
 
     def robots_txt(self):
         """ Keep web crawlers out """
-        self.set_header(b'Content-Type', 'text/plain')
+        self.set_header('Content-Type', 'text/plain')
         return "User-agent: *\nDisallow: /"
 
     def apibuilder(self):
@@ -213,13 +211,13 @@ class WebRoot(WebHandler):
         )
 
         for result in results:
-            if result[b'showid'] not in episodes:
-                episodes[result[b'showid']] = {}
+            if result['showid'] not in episodes:
+                episodes[result['showid']] = {}
 
-            if result[b'season'] not in episodes[result[b'showid']]:
-                episodes[result[b'showid']][result[b'season']] = []
+            if result['season'] not in episodes[result['showid']]:
+                episodes[result['showid']][result['season']] = []
 
-            episodes[result[b'showid']][result[b'season']].append(result[b'episode'])
+            episodes[result['showid']][result['season']].append(result['episode'])
 
         if len(sickbeard.API_KEY) == 32:
             apikey = sickbeard.API_KEY
@@ -250,10 +248,10 @@ class WebRoot(WebHandler):
             stat_result = os.stat(abspath)
             modified = datetime.datetime.fromtimestamp(int(stat_result.st_mtime))
 
-            self.set_header(b'Last-Modified', modified)
-            self.set_header(b'Content-Type', media.get_media_type())
-            self.set_header(b'Accept-Ranges', 'bytes')
-            self.set_header(b'Cache-Control', 'public, max-age=86400')
+            self.set_header('Last-Modified', modified)
+            self.set_header('Content-Type', media.get_media_type())
+            self.set_header('Accept-Ranges', 'bytes')
+            self.set_header('Cache-Control', 'public, max-age=86400')
 
             return media.get_media()
 
@@ -358,7 +356,7 @@ class UI(WebRoot):
             locale_dir=sickbeard.LOCALE_DIR, lang=sickbeard.GUI_LANG))
 
         if os.path.isfile(locale_file):
-            self.set_header(b'Content-Type', 'application/json')
+            self.set_header('Content-Type', 'application/json')
             with open(locale_file, 'r') as content:
                 return content.read()
         else:
@@ -373,8 +371,8 @@ class UI(WebRoot):
         return "ok"
 
     def get_messages(self):
-        self.set_header(b'Cache-Control', 'max-age=0,no-cache,no-store')
-        self.set_header(b'Content-Type', 'application/json')
+        self.set_header('Cache-Control', 'max-age=0,no-cache,no-store')
+        self.set_header('Content-Type', 'application/json')
         notifications = ui.notifications.get_notifications(self.request.remote_ip)
         messages = {}
         for index, cur_notification in enumerate(notifications, 1):
@@ -388,7 +386,7 @@ class UI(WebRoot):
         return json.dumps(messages)
 
     def set_site_message(self, message, tag, level):
-        self.set_header(b'Cache-Control', 'max-age=0,no-cache,no-store')
+        self.set_header('Cache-Control', 'max-age=0,no-cache,no-store')
         if message:
             helpers.add_site_message(message, tag=tag, level=level)
         else:
@@ -400,24 +398,24 @@ class UI(WebRoot):
         return sickbeard.SITE_MESSAGES
 
     def get_site_messages(self):
-        self.set_header(b'Cache-Control', 'max-age=0,no-cache,no-store')
+        self.set_header('Cache-Control', 'max-age=0,no-cache,no-store')
         return sickbeard.SITE_MESSAGES
 
     def dismiss_site_message(self, index):
-        self.set_header(b'Cache-Control', 'max-age=0,no-cache,no-store')
+        self.set_header('Cache-Control', 'max-age=0,no-cache,no-store')
         helpers.remove_site_message(key=index)
         return sickbeard.SITE_MESSAGES
 
     def sickchill_background(self):
         if sickbeard.SICKCHILL_BACKGROUND_PATH and os.path.isfile(sickbeard.SICKCHILL_BACKGROUND_PATH):
-            self.set_header(b'Content-Type', guess_type(sickbeard.SICKCHILL_BACKGROUND_PATH)[0])
+            self.set_header('Content-Type', guess_type(sickbeard.SICKCHILL_BACKGROUND_PATH)[0])
             with open(sickbeard.SICKCHILL_BACKGROUND_PATH, 'rb') as content:
                 return content.read()
         return None
 
     def custom_css(self):
         if sickbeard.CUSTOM_CSS_PATH and os.path.isfile(sickbeard.CUSTOM_CSS_PATH):
-            self.set_header(b'Content-Type', 'text/css')
+            self.set_header('Content-Type', 'text/css')
             with open(sickbeard.CUSTOM_CSS_PATH, 'r') as content:
                 return content.read()
         return None

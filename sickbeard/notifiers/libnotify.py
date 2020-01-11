@@ -18,7 +18,7 @@
 # You should have received a copy of the GNU General Public License
 # along with SickChill. If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import print_function, unicode_literals
+#
 
 import cgi
 import os
@@ -26,7 +26,6 @@ import warnings
 
 import sickbeard
 from sickbeard import common
-from sickchill.helper.encoding import ek
 
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
@@ -111,7 +110,7 @@ class Notifier(object):
 
     def _notify(self, title, message, force=False):
         if self.notify_initialized and sickbeard.USE_LIBNOTIFY | force:
-            icon = ek(os.path.join, sickbeard.PROG_DIR, 'gui', 'slick', 'images', 'ico', 'favicon-120.png')
+            icon = os.path.join(sickbeard.PROG_DIR, 'gui', 'slick', 'images', 'ico', 'favicon-120.png')
             # noinspection PyBroadException
             try:
                 n = Notify.Notification.new(title, message, icon)

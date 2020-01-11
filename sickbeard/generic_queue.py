@@ -18,7 +18,7 @@
 # You should have received a copy of the GNU General Public License
 # along with SickChill. If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import print_function, unicode_literals
+#
 
 import datetime
 import threading
@@ -89,23 +89,8 @@ class GenericQueue(object):
 
                 # if there's something in the queue then run it in a thread and take it out of the queue
                 if self.queue:
+                    self.queue.sort(key=lambda x: [x.priority * -1, x.added])
 
-                    # sort by priority
-                    def sorter(x, y):
-                        """
-                        Sorts by priority descending then time ascending
-                        """
-                        if x.priority == y.priority:
-                            if y.added == x.added:
-                                return 0
-                            elif y.added < x.added:
-                                return 1
-                            elif y.added > x.added:
-                                return -1
-                        else:
-                            return y.priority - x.priority
-
-                    self.queue.sort(cmp=sorter)
                     if self.queue[0].priority < self.min_priority:
                         return
 

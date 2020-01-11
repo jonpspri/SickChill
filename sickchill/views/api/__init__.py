@@ -18,7 +18,7 @@
 # along with SickChill. If not, see <http://www.gnu.org/licenses/>.
 # pylint: disable=abstract-method,too-many-lines, R
 
-from __future__ import print_function, unicode_literals
+#
 
 from .authentication import KeyHandler
 from .webapi import (ApiCall, ApiError, ApiHandler, CMDBacklog, CMDComingEpisodes, CMDDailySearch, CMDEpisode, CMDEpisodeSearch, CMDEpisodeSetStatus,

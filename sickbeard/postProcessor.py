@@ -19,7 +19,7 @@
 # along with SickChill. If not, see <http://www.gnu.org/licenses/>.
 # pylint: disable=too-many-lines
 
-from __future__ import print_function, unicode_literals
+#
 
 import fnmatch
 import os
@@ -28,7 +28,7 @@ import stat
 import subprocess
 
 import adba
-import six
+# import six
 
 import sickbeard
 from sickbeard import common, db, failed_history, helpers, history, logger, notifiers, show_name_helpers
@@ -36,7 +36,7 @@ from sickbeard.helpers import verify_freespace
 from sickbeard.name_parser.parser import InvalidNameException, InvalidShowException, NameParser
 from sickchill.helper import glob
 from sickchill.helper.common import remove_extension, replace_extension, SUBTITLE_EXTENSIONS
-from sickchill.helper.encoding import ek
+# from sickchill.helper.encoding import ek
 from sickchill.helper.exceptions import EpisodeNotFoundException, EpisodePostProcessingFailedException, ex, ShowDirectoryNotFoundException
 from sickchill.show.Show import Show
 
@@ -69,16 +69,16 @@ class PostProcessor(object):  # pylint: disable=too-many-instance-attributes
         nzb_name: The name of the NZB which resulted in this file being downloaded (optional)
         """
         # absolute path to the folder that is being processed
-        self.folder_path = ek(os.path.dirname, ek(os.path.abspath, file_path))
+        self.folder_path = os.path.dirname(os.path.abspath(file_path))
 
         # full path to file
         self.file_path = file_path
 
         # file name only
-        self.file_name = ek(os.path.basename, file_path)
+        self.file_name = os.path.basename(file_path)
 
         # the name of the folder only
-        self.folder_name = ek(os.path.basename, self.folder_path)
+        self.folder_name = os.path.basename(self.folder_path)
 
         # name of the NZB that resulted in this folder
         self.nzb_name = nzb_name
@@ -130,14 +130,14 @@ class PostProcessor(object):  # pylint: disable=too-many-instance-attributes
             return PostProcessor.DOESNT_EXIST
 
         # if the new file exists, return the appropriate code depending on the size
-        if ek(os.path.isfile, existing_file):
+        if os.path.isfile(existing_file):
 
             # see if it's bigger than our old file
-            if ek(os.path.getsize, existing_file) > ek(os.path.getsize, self.file_path):
+            if os.path.getsize(existing_file) > os.path.getsize(self.file_path):
                 self._log("File " + existing_file + " is larger than " + self.file_path, logger.DEBUG)
                 return PostProcessor.EXISTS_LARGER
 
-            elif ek(os.path.getsize, existing_file) == ek(os.path.getsize, self.file_path):
+            elif os.path.getsize(existing_file) == os.path.getsize(self.file_path):
                 self._log("File " + existing_file + " is the same size as " + self.file_path, logger.DEBUG)
                 return PostProcessor.EXISTS_SAME
 
@@ -160,10 +160,10 @@ class PostProcessor(object):  # pylint: disable=too-many-instance-attributes
         """
         def recursive_glob(treeroot, pattern):
             results = []
-            for base, dirnames_, files in ek(os.walk, treeroot.encode(sickbeard.SYS_ENCODING), followlinks=sickbeard.PROCESSOR_FOLLOW_SYMLINKS):
+            for base, dirnames_, files in os.walk(treeroot, followlinks=sickbeard.PROCESSOR_FOLLOW_SYMLINKS):
                 goodfiles = fnmatch.filter(files, pattern)
                 for f in goodfiles:
-                    found_file = ek(os.path.join, base, f)
+                    found_file = os.path.join(base, f)
                     if found_file != file_path:
                         results.append(found_file)
             return results
@@ -175,7 +175,7 @@ class PostProcessor(object):  # pylint: disable=too-many-instance-attributes
         file_path_list_to_delete = []
 
         if subfolders:
-            base_name = ek(os.path.basename, file_path).rpartition('.')[0]
+            base_name = os.path.basename(file_path).rpartition('.')[0]
         else:
             base_name = file_path.rpartition('.')[0]
 
@@ -183,7 +183,7 @@ class PostProcessor(object):  # pylint: disable=too-many-instance-attributes
         if not base_name:
             return []
 
-        dirname = ek(os.path.dirname, file_path) or '.'
+        dirname = os.path.dirname(file_path) or '.'
 
         # subfolders are only checked in show folder, so names will always be exactly alike
         if subfolders:
@@ -194,7 +194,7 @@ class PostProcessor(object):  # pylint: disable=too-many-instance-attributes
             filelist = []
 
             # loop through all the files in the folder, and check if they are the same name even when the cases don't match
-            for found_file in glob.glob(ek(os.path.join, glob.escape(dirname), '*')):
+            for found_file in glob.glob(os.path.join(glob.escape(dirname), '*')):
                 file_name, separator, file_extension = found_file.rpartition('.')
 
                 # Handles subtitles with language code
@@ -223,7 +223,7 @@ class PostProcessor(object):  # pylint: disable=too-many-instance-attributes
                 continue
 
             # Define associated files (all, allowed and non allowed)
-            if ek(os.path.isfile, associated_file_path):
+            if os.path.isfile(associated_file_path):
                 # check if allowed or not during post processing
                 if sickbeard.MOVE_ASSOCIATED_FILES and associated_file_path.endswith(tuple(sickbeard.ALLOWED_EXTENSIONS.split(","))):
                     file_path_list_to_allow.append(associated_file_path)
@@ -270,19 +270,19 @@ class PostProcessor(object):  # pylint: disable=too-many-instance-attributes
 
         # delete the file and any other files which we want to delete
         for cur_file in file_list:
-            if ek(os.path.isfile, cur_file):
+            if os.path.isfile(cur_file):
                 self._log("Deleting file " + cur_file, logger.DEBUG)
                 # check first the read-only attribute
-                file_attribute = ek(os.stat, cur_file)[0]
+                file_attribute = os.stat(cur_file)[0]
                 if not file_attribute & stat.S_IWRITE:
                     # File is read-only, so make it writeable
                     self._log('Read only mode on file ' + cur_file + ' Will try to make it writeable', logger.DEBUG)
                     try:
-                        ek(os.chmod, cur_file, stat.S_IWRITE)
+                        os.chmod(cur_file, stat.S_IWRITE)
                     except Exception:
                         self._log('Cannot change permissions of ' + cur_file, logger.WARNING)
 
-                ek(os.remove, cur_file)
+                os.remove(cur_file)
 
                 # do the library update for synoindex
                 notifiers.synoindex_notifier.deleteFile(cur_file)
@@ -307,7 +307,7 @@ class PostProcessor(object):  # pylint: disable=too-many-instance-attributes
             return
 
         file_list = [file_path]
-        subfolders = ek(os.path.normpath, ek(os.path.dirname, file_path)) != ek(os.path.normpath, sickbeard.TV_DOWNLOAD_DIR)
+        subfolders = os.path.normpath(os.path.dirname(file_path)) != os.path.normpath(sickbeard.TV_DOWNLOAD_DIR)
         if associated_files:
             file_list = file_list + self.list_associated_files(file_path, subfolders=subfolders)
         elif subtitles:
@@ -342,18 +342,18 @@ class PostProcessor(object):  # pylint: disable=too-many-instance-attributes
                 new_file_name = '.'.join((new_base_name, cur_extension))
             # if we're not renaming we still want to change extensions sometimes
             else:
-                new_file_name = ek(os.path.basename, replace_extension(cur_file_path, cur_extension))
+                new_file_name = os.path.basename(replace_extension(cur_file_path, cur_extension))
 
             if sickbeard.SUBTITLES_DIR and cur_extension.endswith(tuple(SUBTITLE_EXTENSIONS)):
-                subs_new_path = ek(os.path.join, new_path, sickbeard.SUBTITLES_DIR)
+                subs_new_path = os.path.join(new_path, sickbeard.SUBTITLES_DIR)
                 dir_exists = helpers.makeDir(subs_new_path)
                 if not dir_exists:
                     logger.log("Unable to create subtitles folder " + subs_new_path, logger.ERROR)
                 else:
                     helpers.chmodAsParent(subs_new_path)
-                new_file_path = ek(os.path.join, subs_new_path, new_file_name)
+                new_file_path = os.path.join(subs_new_path, new_file_name)
             else:
-                new_file_path = ek(os.path.join, new_path, new_file_name)
+                new_file_path = os.path.join(new_path, new_file_name)
 
             action(cur_file_path, new_file_path)
 
@@ -471,7 +471,6 @@ class PostProcessor(object):  # pylint: disable=too-many-instance-attributes
         self._combined_file_operation(file_path, new_path, new_base_name, associated_files,
                                       action=_int_sym_link, subtitles=subtitles)
 
-
     def _history_lookup(self):
         """
         Look up the NZB name in the history and see if it contains a record for self.nzb_name
@@ -546,7 +545,7 @@ class PostProcessor(object):  # pylint: disable=too-many-instance-attributes
                 parse_result.release_group):
 
             if not self.release_name:
-                self.release_name = helpers.remove_non_release_groups(remove_extension(ek(os.path.basename, parse_result.original_name)))
+                self.release_name = helpers.remove_non_release_groups(remove_extension(os.path.basename(parse_result.original_name)))
 
         else:
             logger.log("Parse result not sufficient (all following have to be set). will not save release name",
@@ -845,32 +844,12 @@ class PostProcessor(object):  # pylint: disable=too-many-instance-attributes
             return
 
         file_path = self.file_path
-        if isinstance(file_path, six.text_type):
-            try:
-                file_path = file_path.encode(sickbeard.SYS_ENCODING)
-            except UnicodeEncodeError:
-                # ignore it
-                pass
-
         ep_location = ep_obj.location
-        if isinstance(ep_location, six.text_type):
-            try:
-                ep_location = ep_location.encode(sickbeard.SYS_ENCODING)
-            except UnicodeEncodeError:
-                # ignore it
-                pass
 
         for curScriptName in sickbeard.EXTRA_SCRIPTS:
-            if isinstance(curScriptName, six.text_type):
-                try:
-                    curScriptName = curScriptName.encode(sickbeard.SYS_ENCODING)
-                except UnicodeEncodeError:
-                    # ignore it
-                    pass
-
             # generate a safe command line string to execute the script and provide all the parameters
             script_cmd = [piece for piece in re.split(r'(\'.*?\'|".*?"| )', curScriptName) if piece.strip()]
-            script_cmd[0] = ek(os.path.abspath, script_cmd[0])
+            script_cmd[0] = os.path.abspath(script_cmd[0])
             self._log("Absolute path to script: {0}".format(script_cmd[0]), logger.DEBUG)
 
             script_cmd += [
@@ -946,11 +925,11 @@ class PostProcessor(object):  # pylint: disable=too-many-instance-attributes
 
         self._log("Processing " + self.file_path + " (" + str(self.nzb_name) + ")")
 
-        if ek(os.path.isdir, self.file_path):
+        if os.path.isdir(self.file_path):
             self._log("File {0} seems to be a directory".format(self.file_path))
             return False
 
-        if not ek(os.path.exists, self.file_path):
+        if not os.path.exists(self.file_path):
             self._log("File {0} doesn't exist, did unrar fail?".format(self.file_path))
             return False
 
@@ -1060,7 +1039,7 @@ class PostProcessor(object):  # pylint: disable=too-many-instance-attributes
 
                 # clean up any left over folders
                 if cur_ep.location:
-                    helpers.delete_empty_folders(ek(os.path.dirname, cur_ep.location), keep_dir=ep_obj.show._location)  # pylint: disable=protected-access
+                    helpers.delete_empty_folders(os.path.dirname(cur_ep.location), keep_dir=ep_obj.show._location)  # pylint: disable=protected-access
             except (OSError, IOError):
                 raise EpisodePostProcessingFailedException("Unable to delete the existing files")
 
@@ -1069,10 +1048,10 @@ class PostProcessor(object):  # pylint: disable=too-many-instance-attributes
             #    curEp.status = common.Quality.compositeStatus(common.SNATCHED, new_ep_quality)
 
         # if the show directory doesn't exist then make it if allowed
-        if not ek(os.path.isdir, ep_obj.show._location) and sickbeard.CREATE_MISSING_SHOW_DIRS:  # pylint: disable=protected-access
+        if not os.path.isdir(ep_obj.show._location) and sickbeard.CREATE_MISSING_SHOW_DIRS:  # pylint: disable=protected-access
             self._log("Show directory doesn't exist, creating it", logger.DEBUG)
             try:
-                ek(os.mkdir, ep_obj.show._location)  # pylint: disable=protected-access
+                os.mkdir(ep_obj.show._location)  # pylint: disable=protected-access
                 helpers.chmodAsParent(ep_obj.show._location)  # pylint: disable=protected-access
 
                 # do the library update for synoindex
@@ -1128,9 +1107,9 @@ class PostProcessor(object):  # pylint: disable=too-many-instance-attributes
         # find the destination folder
         try:
             proper_path = ep_obj.proper_path()
-            proper_absolute_path = ek(os.path.join, ep_obj.show.location, proper_path)
+            proper_absolute_path = os.path.join(ep_obj.show.location, proper_path)
 
-            dest_path = ek(os.path.dirname, proper_absolute_path)
+            dest_path = os.path.dirname(proper_absolute_path)
         except ShowDirectoryNotFoundException:
             raise EpisodePostProcessingFailedException(
                 "Unable to post-process an episode if the show dir doesn't exist, quitting")
@@ -1143,7 +1122,7 @@ class PostProcessor(object):  # pylint: disable=too-many-instance-attributes
         # figure out the base name of the resulting episode file
         if sickbeard.RENAME_EPISODES:
             orig_extension = self.file_name.rpartition('.')[-1]
-            new_base_name = ek(os.path.basename, proper_path)
+            new_base_name = os.path.basename(proper_path)
             new_file_name = new_base_name + '.' + orig_extension
 
         else:
@@ -1177,7 +1156,7 @@ class PostProcessor(object):  # pylint: disable=too-many-instance-attributes
                                      sickbeard.USE_SUBTITLES and ep_obj.show.subtitles)
             elif self.process_method == METHOD_SYMLINK_REVERSED:
                 self._symlink(self.file_path, dest_path, new_base_name, sickbeard.MOVE_ASSOCIATED_FILES,
-                                     sickbeard.USE_SUBTITLES and ep_obj.show.subtitles)
+                              sickbeard.USE_SUBTITLES and ep_obj.show.subtitles)
             else:
                 logger.log("Unknown process method: " + str(self.process_method), logger.ERROR)
                 raise EpisodePostProcessingFailedException("Unable to move the files to their new home")
@@ -1186,10 +1165,10 @@ class PostProcessor(object):  # pylint: disable=too-many-instance-attributes
 
         for cur_ep in [ep_obj] + ep_obj.relatedEps:
             with cur_ep.lock:
-                cur_ep.location = ek(os.path.join, dest_path, new_file_name)
+                cur_ep.location = os.path.join(dest_path, new_file_name)
                 # download subtitles
                 if sickbeard.USE_SUBTITLES and ep_obj.show.subtitles \
-                    and (cur_ep.season != 0 or sickbeard.SUBTITLES_INCLUDE_SPECIALS):
+                        and (cur_ep.season != 0 or sickbeard.SUBTITLES_INCLUDE_SPECIALS):
                     cur_ep.refreshSubtitles()
                     cur_ep.download_subtitles(force=True)
                 sql_l.append(cur_ep.get_sql())

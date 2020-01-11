@@ -18,8 +18,6 @@
 # You should have received a copy of the GNU General Public License
 # along with SickChill. If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import print_function, unicode_literals
-
 import re
 import telnetlib
 
@@ -27,7 +25,6 @@ from six.moves import urllib
 
 import sickbeard
 from sickbeard import logger
-from sickchill.helper.exceptions import ex
 
 try:
     import xml.etree.cElementTree as etree
@@ -133,7 +130,7 @@ class Notifier(object):
                     logger.log("NMJ: Problem with Popcorn Hour on host {0}: {1}".format(host, e.code), logger.WARNING)
                 return False
             except Exception as e:
-                logger.log("NMJ: Unknown exception: " + ex(e), logger.ERROR)
+                logger.log("NMJ: Unknown exception: " + repr(e), logger.ERROR)
                 return False
 
         # build up the request URL and parameters
@@ -160,7 +157,7 @@ class Notifier(object):
                 logger.log("NMJ: Problem with Popcorn Hour on host {0}: {1}".format(host, e.code), logger.WARNING)
             return False
         except Exception as e:
-            logger.log("NMJ: Unknown exception: " + ex(e), logger.ERROR)
+            logger.log("NMJ: Unknown exception: " + repr(e), logger.ERROR)
             return False
 
         # try to parse the resulting XML

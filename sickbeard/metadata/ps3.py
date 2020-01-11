@@ -18,12 +18,11 @@
 # You should have received a copy of the GNU General Public License
 # along with SickChill. If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import unicode_literals
+#
 
 import os
 
 from sickbeard.metadata import generic
-from sickchill.helper.encoding import ek
 
 
 class PS3Metadata(generic.GenericMetadata):
@@ -120,7 +119,7 @@ class PS3Metadata(generic.GenericMetadata):
 
         ep_obj: a TVEpisode instance for which to create the thumbnail
         """
-        if ek(os.path.isfile, ep_obj.location):
+        if os.path.isfile(ep_obj.location):
             tbn_filename = ep_obj.location + ".cover.jpg"
         else:
             return None

@@ -17,19 +17,18 @@
 # You should have received a copy of the GNU General Public License
 # along with SickChill. If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import print_function, unicode_literals
+#
 
 import datetime
 import re
 
-import six
 from babelfish import Country
 
 import sickbeard
 from sickbeard import helpers, logger
 from sickbeard.metadata import generic
 from sickchill.helper.common import dateFormat
-from sickchill.helper.exceptions import ex, ShowNotFoundException
+from sickchill.helper.exceptions import ShowNotFoundException
 
 try:
     import xml.etree.cElementTree as etree
@@ -177,7 +176,7 @@ class KODI_12PlusMetadata(generic.GenericMetadata):
             indexerid = etree.SubElement(tv_node, "id")
             indexerid.text = str(myShow["id"])
 
-        if getattr(myShow, 'genre', None) and isinstance(myShow["genre"], six.string_types):
+        if getattr(myShow, 'genre', None):
             for genre in self._split_info(myShow["genre"]):
                 cur_genre = etree.SubElement(tv_node, "genre")
                 cur_genre.text = genre
@@ -200,12 +199,12 @@ class KODI_12PlusMetadata(generic.GenericMetadata):
             studio = etree.SubElement(tv_node, "studio")
             studio.text = myShow["network"].strip()
 
-        if getattr(myShow, 'writer', None) and isinstance(myShow['writer'], six.string_types):
+        if getattr(myShow, 'writer', None):
             for writer in self._split_info(myShow['writer']):
                 cur_writer = etree.SubElement(tv_node, "credits")
                 cur_writer.text = writer
 
-        if getattr(myShow, 'director', None) and isinstance(myShow['director'], six.string_types):
+        if getattr(myShow, 'director', None):
             for director in self._split_info(myShow['director']):
                 cur_director = etree.SubElement(tv_node, "director")
                 cur_director.text = director
@@ -262,7 +261,7 @@ class KODI_12PlusMetadata(generic.GenericMetadata):
             raise ShowNotFoundException(e.message)
         except sickbeard.indexer_error as e:
             logger.log("Unable to connect to " + sickbeard.indexerApi(
-                ep_obj.show.indexer).name + " while creating meta files - skipping - " + ex(e), logger.ERROR)
+                ep_obj.show.indexer).name + " while creating meta files - skipping - " + repr(e), logger.ERROR)
             return
 
         if len(eps_to_write) > 1:
@@ -278,8 +277,8 @@ class KODI_12PlusMetadata(generic.GenericMetadata):
             except (sickbeard.indexer_episodenotfound, sickbeard.indexer_seasonnotfound):
                 logger.log("Metadata writer is unable to find episode {0:d}x{1:d} of {2} on {3}..."
                            "has it been removed? Should I delete from db?".format(
-                    curEpToWrite.season, curEpToWrite.episode, curEpToWrite.show.name,
-                    sickbeard.indexerApi(ep_obj.show.indexer).name))
+                                curEpToWrite.season, curEpToWrite.episode, curEpToWrite.show.name,
+                                sickbeard.indexerApi(ep_obj.show.indexer).name))
 
                 return None
 
@@ -345,17 +344,17 @@ class KODI_12PlusMetadata(generic.GenericMetadata):
                 rating = etree.SubElement(episode, "rating")
                 rating.text = myEp['rating']
 
-            if getattr(myEp, 'writer', None) and isinstance(myEp['writer'], six.string_types):
+            if getattr(myEp, 'writer', None):
                 for writer in self._split_info(myEp['writer']):
                     cur_writer = etree.SubElement(episode, "credits")
                     cur_writer.text = writer
 
-            if getattr(myEp, 'director', None) and isinstance(myEp['director'], six.string_types):
+            if getattr(myEp, 'director', None):
                 for director in self._split_info(myEp['director']):
                     cur_director = etree.SubElement(episode, "director")
                     cur_director.text = director
 
-            if getattr(myEp, 'gueststars', None) and isinstance(myEp['gueststars'], six.string_types):
+            if getattr(myEp, 'gueststars', None):
                 for actor in self._split_info(myEp['gueststars']):
                     cur_actor = etree.SubElement(episode, "actor")
                     cur_actor_name = etree.SubElement(cur_actor, "name")

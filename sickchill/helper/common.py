@@ -21,7 +21,7 @@
 Common helper functions
 """
 
-from __future__ import print_function, unicode_literals
+#
 
 import glob
 import os

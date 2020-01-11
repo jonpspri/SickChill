@@ -18,7 +18,7 @@
 #
 # Uses the Synology Download Station API: http://download.synology.com/download/Document/DeveloperGuide/Synology_Download_Station_Web_API.pdf
 
-from __future__ import unicode_literals
+#
 
 import os
 import re

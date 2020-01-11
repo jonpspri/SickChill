@@ -19,8 +19,6 @@
 # You should have received a copy of the GNU General Public License
 # along with SickChill. If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import print_function, unicode_literals
-
 import time
 
 from six.moves import http_client, urllib
@@ -29,7 +27,6 @@ import sickbeard
 from sickbeard import logger
 from sickbeard.common import (NOTIFY_DOWNLOAD, NOTIFY_GIT_UPDATE, NOTIFY_GIT_UPDATE_TEXT, NOTIFY_LOGIN, NOTIFY_LOGIN_TEXT, NOTIFY_SNATCH,
                               NOTIFY_SUBTITLE_DOWNLOAD, notifyStrings)
-from sickchill.helper.exceptions import ex
 
 API_URL = "https://api.pushover.net/1/messages.json"
 
@@ -107,7 +104,7 @@ class Notifier(object):
         except urllib.error.HTTPError as e:
             # if we get an error back that doesn't have an error code then who knows what's really happening
             if not hasattr(e, 'code'):
-                logger.log("Pushover notification failed." + ex(e), logger.ERROR)
+                logger.log("Pushover notification failed." + repr(e), logger.ERROR)
                 return False
             else:
                 logger.log("Pushover notification failed. Error code: " + str(e.code), logger.ERROR)

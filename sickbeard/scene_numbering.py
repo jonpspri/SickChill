@@ -23,7 +23,7 @@
 # @copyright: Dermot Buckley
 #
 
-from __future__ import print_function, unicode_literals
+#
 
 import datetime
 import time
@@ -32,7 +32,6 @@ import traceback
 import sickbeard
 from sickbeard import db, logger
 from sickbeard.scene_exceptions import xem_session
-from sickchill.helper.exceptions import ex
 from sickchill.show.Show import Show
 
 
@@ -539,7 +538,7 @@ def xem_refresh(indexer_id, indexer, force=False):
         except Exception as e:
             logger.log(
                 "Exception while refreshing XEM data for show " + str(indexer_id) + " on " + sickbeard.indexerApi(
-                    indexer).name + ": " + ex(e), logger.WARNING)
+                    indexer).name + ": " + repr(e), logger.WARNING)
             logger.log(traceback.format_exc(), logger.DEBUG)
 
 

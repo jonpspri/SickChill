@@ -19,7 +19,7 @@
 # along with SickChill. If not, see <http://www.gnu.org/licenses/>.
 # pylint:disable=too-many-lines
 
-from __future__ import print_function, unicode_literals
+#
 
 import ast
 import base64
@@ -65,8 +65,6 @@ from sickbeard import classes, db, logger
 from sickbeard.common import USER_AGENT
 from sickchill.helper import episode_num, MEDIA_EXTENSIONS, pretty_file_size, SUBTITLE_EXTENSIONS
 from sickchill.helper.common import replace_extension
-from sickchill.helper.encoding import ek
-from sickchill.helper.exceptions import ex
 from sickchill.show.Show import Show
 
 # Add some missing languages
@@ -101,6 +99,8 @@ copyfileobj_orig = shutil.copyfileobj
 def _copyfileobj(fsrc, fdst, length=10485760):
     """ Run shutil.copyfileobj with a bigger buffer """
     return copyfileobj_orig(fsrc, fdst, length)
+
+
 shutil.copyfileobj = _copyfileobj
 
 
@@ -656,7 +656,7 @@ def chmodAsParent(childPath):
     parentPathStat = os.stat(parentPath)
     parentMode = stat.S_IMODE(parentPathStat[stat.ST_MODE])
 
-    childPathStat = os.stat(childPath.encode(sickbeard.SYS_ENCODING))
+    childPathStat = os.stat(childPath)
     childPath_mode = stat.S_IMODE(childPathStat[stat.ST_MODE])
 
     if os.path.isfile(childPath):
@@ -699,7 +699,7 @@ def fixSetGroupID(childPath):
 
     if parentMode & stat.S_ISGID:
         parentGID = parentStat[stat.ST_GID]
-        childStat = os.stat(childPath.encode(sickbeard.SYS_ENCODING))
+        childStat = os.stat(childPath)
         childGID = childStat[stat.ST_GID]
 
         if childGID == parentGID:
@@ -1608,8 +1608,8 @@ def get_size(start_path='.'):
 def generateApiKey():
     """ Return a new randomized API_KEY"""
     logger.log(_("Generating New API key"))
-    secure_hash = hashlib.sha512(str(time.time()))
-    secure_hash.update(str(random.SystemRandom().getrandbits(4096)))
+    secure_hash = hashlib.sha512(str(time.time()).encode('utf-8'))
+    secure_hash.update(str(random.SystemRandom().getrandbits(4096)).encode('utf-8'))
     return secure_hash.hexdigest()[:32]
 
 
@@ -1844,7 +1844,7 @@ def get_showname_from_indexer(indexer, indexer_id, lang='en'):
             return s.data.get('seriesname')
     except (sickbeard.indexer_error, IOError) as e:
         logger.log(_("Show id {} not found on {}, not adding the show: {}").format(
-            indexer_id, sickbeard.indexerApi(indexer).name, ex(e)), logger.WARNING)
+            indexer_id, sickbeard.indexerApi(indexer).name, repr(e)), logger.WARNING)
         return None
 
     return None
@@ -1936,9 +1936,9 @@ def bdecode(x, allow_extra_data=False):
     :return: bdecoded data
     """
     try:
-        r, l = bencode.decode_func[x[0]](x, 0)
+        right, left = bencode.decode_func[x[0]](x, 0)
     except (IndexError, KeyError, ValueError):
         raise bencode.BTL.BTFailure("not a valid bencoded string")
-    if not allow_extra_data and l != len(x):
+    if not allow_extra_data and left != len(x):
         raise bencode.BTL.BTFailure("invalid bencoded value (data after valid prefix)")
-    return r
+    return right

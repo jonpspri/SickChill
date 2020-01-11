@@ -18,13 +18,12 @@
 # You should have received a copy of the GNU General Public License
 # along with SickChill. If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import unicode_literals
+#
 
 import os
 
 from sickbeard.metadata import generic, kodi_12plus
 from sickchill.helper.common import replace_extension
-from sickchill.helper.encoding import ek
 
 
 class KODIMetadata(kodi_12plus.KODI_12PlusMetadata):
@@ -100,7 +99,7 @@ class KODIMetadata(kodi_12plus.KODI_12PlusMetadata):
 
         ep_obj: a TVEpisode instance for which to create the thumbnail
         """
-        if ek(os.path.isfile, ep_obj.location):
+        if os.path.isfile(ep_obj.location):
             tbn_filename = replace_extension(ep_obj.location, 'tbn')
         else:
             return None
@@ -123,7 +122,7 @@ class KODIMetadata(kodi_12plus.KODI_12PlusMetadata):
         else:
             season_poster_filename = 'season' + str(season).zfill(2)
 
-        return ek(os.path.join, show_obj.location, season_poster_filename + '.tbn')
+        return os.path.join(show_obj.location, season_poster_filename + '.tbn')
 
 
 # present a standard "interface" from the module

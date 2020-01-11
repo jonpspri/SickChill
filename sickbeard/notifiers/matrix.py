@@ -16,7 +16,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with SickChill. If not, see <http://www.gnu.org/licenses/>.
-from __future__ import unicode_literals
+#
 
 import html
 import json
@@ -27,8 +27,6 @@ import six
 
 import sickbeard
 from sickbeard import common, logger
-from sickchill.helper.encoding import ss
-from sickchill.helper.exceptions import ex
 
 
 class Notifier(object):
@@ -100,7 +98,7 @@ class Notifier(object):
             r.raise_for_status()
 
         except Exception as e:
-            logger.log("Error Sending Matrix message: " + ex(e), logger.ERROR)
+            logger.log("Error Sending Matrix message: " + repr(e), logger.ERROR)
             return False
 
         return True
@@ -113,8 +111,6 @@ class Notifier(object):
 
     @staticmethod
     def _parseEp(ep_name):
-        ep_name = ss(ep_name)
-
         sep = ' - '
         titles = ep_name.split(sep)
         logger.log('TITLES: {0}'.format(titles), logger.DEBUG)

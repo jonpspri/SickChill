@@ -16,7 +16,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with SickChill. If not, see <http://www.gnu.org/licenses/>.
-from __future__ import unicode_literals
+#
 
 import json
 
@@ -25,7 +25,6 @@ import six
 
 import sickbeard
 from sickbeard import common, logger
-from sickchill.helper.exceptions import ex
 
 
 class Notifier(object):
@@ -74,7 +73,7 @@ class Notifier(object):
             r = requests.post(discord_webhook, data=json.dumps(dict(content=message, username=discord_name, avatar_url=avatar_icon, tts=discord_tts)), headers=headers)
             r.raise_for_status()
         except Exception as e:
-            logger.log("Error Sending Discord message: " + ex(e), logger.ERROR)
+            logger.log("Error Sending Discord message: " + repr(e), logger.ERROR)
             return False
 
         return True

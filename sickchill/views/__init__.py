@@ -17,12 +17,13 @@
 # You should have received a copy of the GNU General Public License
 # along with SickChill. If not, see <http://www.gnu.org/licenses/>.
 # pylint: disable=abstract-method,too-many-lines, R
+# pylama: ignore=W0611
 
-from __future__ import print_function, unicode_literals
+#
 
 from .calendar import CalendarHandler
 from .config import (Config, ConfigAnime, ConfigBackupRestore, ConfigNotifications, ConfigPostProcessing, ConfigProviders, ConfigSearch, ConfigShares,
-                    ConfigSubtitles)
+                     ConfigSubtitles)
 
 from .api import ApiCall, ApiHandler, function_mapper, KeyHandler
 from .authentication import LoginHandler, LogoutHandler

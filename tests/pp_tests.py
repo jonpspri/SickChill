@@ -21,7 +21,7 @@
 Test post processing
 """
 
-from __future__ import print_function, unicode_literals
+#
 
 import os.path
 import shutil

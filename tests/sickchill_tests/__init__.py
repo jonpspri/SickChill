@@ -21,7 +21,7 @@
 Tests for SickChill
 """
 
-from __future__ import print_function
+#
 
 import helper
 import media

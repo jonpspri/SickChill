@@ -17,14 +17,14 @@
 # You should have received a copy of the GNU General Public License
 # along with SickChill. If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import unicode_literals
+#
 
 from datetime import date
 
 import sickbeard
 from sickbeard.common import Quality, SKIPPED, WANTED
 from sickbeard.db import DBConnection
-from sickchill.helper.exceptions import CantRefreshShowException, CantRemoveShowException, ex, MultipleShowObjectsException
+from sickchill.helper.exceptions import CantRefreshShowException, CantRemoveShowException, MultipleShowObjectsException
 
 
 class Show(object):
@@ -51,7 +51,7 @@ class Show(object):
             try:
                 sickbeard.showQueueScheduler.action.remove_show(show, bool(remove_files))
             except CantRemoveShowException as exception:
-                return ex(exception), show
+                return repr(exception), show
 
         return None, show
 
@@ -164,7 +164,7 @@ class Show(object):
         try:
             sickbeard.showQueueScheduler.action.refresh_show(show)
         except CantRefreshShowException as exception:
-            return ex(exception), show
+            return repr(exception), show
 
         return None, show
 

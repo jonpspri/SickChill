@@ -18,7 +18,7 @@
 # along with SickChill. If not, see <http://www.gnu.org/licenses/>.
 # pylint: disable=too-many-lines
 
-from __future__ import print_function, unicode_literals
+#
 
 import datetime
 import gettext
@@ -35,6 +35,8 @@ import requests
 from configobj import ConfigObj
 from tornado.locale import load_gettext_translations
 
+# pylama:ignore=W0611,E501
+
 from sickbeard import (auto_postprocessor, clients, dailysearcher, db, helpers, logger, metadata, naming, post_processing_queue, properFinder, providers,
                        scene_exceptions, scheduler, search_queue, searchBacklog, show_queue, showUpdater, subtitles, traktChecker, versionChecker)
 from sickbeard.common import ARCHIVED, IGNORED, MULTI_EP_STRINGS, SD, SKIPPED, WANTED
@@ -42,15 +44,15 @@ from sickbeard.config import check_section, check_setting_bool, check_setting_fl
 from sickbeard.databases import cache_db, failed_db, mainDB
 from sickbeard.indexers import indexer_api
 from sickbeard.indexers.indexer_exceptions import (indexer_attributenotfound, indexer_episodenotfound, indexer_error, indexer_exception, indexer_seasonnotfound,
-                                                   #indexer_showincomplete,
+                                                   # indexer_showincomplete,
                                                    indexer_shownotfound, indexer_userabort)
 from sickbeard.numdict import NumDict
 from sickbeard.providers.newznab import NewznabProvider
 from sickbeard.providers.rsstorrent import TorrentRssProvider
 from sickchill.helper import setup_github
-from sickchill.helper.encoding import ek
-from sickchill.helper.exceptions import ex
 from sickchill.system.Shutdown import Shutdown
+
+from . import config
 
 gettext.install('messages', codeset='UTF-8', names=["ngettext"])
 
@@ -790,7 +792,7 @@ def initialize(consoleLogging=True):  # pylint: disable=too-many-locals, too-man
             DEFAULT_PAGE = 'home'
 
         ACTUAL_LOG_DIR = check_setting_str(CFG, 'General', 'log_dir', 'Logs')
-        LOG_DIR = ek(os.path.normpath, ek(os.path.join, DATA_DIR, ACTUAL_LOG_DIR))
+        LOG_DIR = os.path.normpath(os.path.join(DATA_DIR, ACTUAL_LOG_DIR))
         LOG_NR = check_setting_int(CFG, 'General', 'log_nr', 5, min_val=1)  # Default to 5 backup file (sickchill.log.x)
         LOG_SIZE = check_setting_float(CFG, 'General', 'log_size', 10.0, min_val=0.5)  # Default to max 10MB per logfile
 
@@ -835,8 +837,8 @@ def initialize(consoleLogging=True):  # pylint: disable=too-many-locals, too-man
             ACTUAL_CACHE_DIR = 'cache'
 
         # unless they specify, put the cache dir inside the data dir
-        if not ek(os.path.isabs, ACTUAL_CACHE_DIR):
-            CACHE_DIR = ek(os.path.join, DATA_DIR, ACTUAL_CACHE_DIR)
+        if not os.path.isabs(ACTUAL_CACHE_DIR):
+            CACHE_DIR = os.path.join(DATA_DIR, ACTUAL_CACHE_DIR)
         else:
             CACHE_DIR = ACTUAL_CACHE_DIR
 
@@ -846,40 +848,40 @@ def initialize(consoleLogging=True):  # pylint: disable=too-many-locals, too-man
 
         # Check if we need to perform a restore of the cache folder
         try:
-            restoreDir = ek(os.path.join, DATA_DIR, 'restore')
-            if ek(os.path.exists, restoreDir) and ek(os.path.exists, ek(os.path.join, restoreDir, 'cache')):
+            restoreDir = os.path.join(DATA_DIR, 'restore')
+            if os.path.exists(restoreDir) and os.path.exists(os.path.join(restoreDir, 'cache')):
                 def restoreCache(srcDir, dstDir):
                     def path_leaf(path):
-                        head, tail = ek(os.path.split, path)
-                        return tail or ek(os.path.basename, head)
+                        head, tail = os.path.split(path)
+                        return tail or os.path.basename(head)
 
                     try:
-                        if ek(os.path.isdir, dstDir):
+                        if os.path.isdir(dstDir):
                             # noinspection PyTypeChecker
                             bakFilename = '{0}-{1}'.format(path_leaf(dstDir), datetime.datetime.strftime(datetime.datetime.now(), '%Y%m%d_%H%M%S'))
-                            shutil.move(dstDir, ek(os.path.join, ek(os.path.dirname, dstDir), bakFilename))
+                            shutil.move(dstDir, os.path.join(os.path.dirname(dstDir), bakFilename))
 
                         shutil.move(srcDir, dstDir)
                         logger.log("Restore: restoring cache successful", logger.INFO)
                     except Exception as er:
                         logger.log("Restore: restoring cache failed: {0}".format(er), logger.ERROR)
 
-                restoreCache(ek(os.path.join, restoreDir, 'cache'), CACHE_DIR)
+                restoreCache(os.path.join(restoreDir, 'cache'), CACHE_DIR)
         except Exception as e:
-            logger.log("Restore: restoring cache failed: {0}".format(ex(e)), logger.ERROR)
+            logger.log("Restore: restoring cache failed: {0}".format(repr(e)), logger.ERROR)
         finally:
-            if ek(os.path.exists, ek(os.path.join, DATA_DIR, 'restore')):
+            if os.path.exists(os.path.join(DATA_DIR, 'restore')):
                 try:
-                    shutil.rmtree(ek(os.path.join, DATA_DIR, 'restore'))
+                    shutil.rmtree(os.path.join(DATA_DIR, 'restore'))
                 except Exception as e:
-                    logger.log("Restore: Unable to remove the restore directory: {0}".format(ex(e)), logger.ERROR)
+                    logger.log("Restore: Unable to remove the restore directory: {0}".format(repr(e)), logger.ERROR)
 
                 for cleanupDir in ['mako', 'sessions', 'indexers', 'rss']:
                     try:
-                        shutil.rmtree(ek(os.path.join, CACHE_DIR, cleanupDir))
+                        shutil.rmtree(os.path.join(CACHE_DIR, cleanupDir))
                     except Exception as e:
                         if cleanupDir not in ['rss', 'sessions', 'indexers']:
-                            logger.log("Restore: Unable to remove the cache/{0} directory: {1}".format(cleanupDir, ex(e)), logger.WARNING)
+                            logger.log("Restore: Unable to remove the cache/{0} directory: {1}".format(cleanupDir, repr(e)), logger.WARNING)
 
         THEME_NAME = check_setting_str(CFG, 'GUI', 'theme_name', 'dark')
         SICKCHILL_BACKGROUND = check_setting_bool(CFG, 'GUI', 'sickchill_background')
@@ -1499,7 +1501,7 @@ def initialize(consoleLogging=True):  # pylint: disable=too-many-locals, too-man
 
         providers.check_enabled_providers()
 
-        if not ek(os.path.isfile, CONFIG_FILE):
+        if not os.path.isfile(CONFIG_FILE):
             logger.log("Unable to find '" + CONFIG_FILE + "', all settings will be default!", logger.DEBUG)
             save_config()
 

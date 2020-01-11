@@ -1,9 +1,11 @@
 # coding=utf-8
 
-from __future__ import print_function, unicode_literals
+#
 
 import os
 import threading
+import asyncio
+
 from socket import errno, error as socket_error
 
 from .routes import Route
@@ -13,7 +15,6 @@ from tornado.web import Application, RedirectHandler, StaticFileHandler, url
 import sickbeard
 from sickbeard import logger
 from sickbeard.helpers import create_https_certificates, generateApiKey
-from sickchill.helper.encoding import ek
 from sickchill.views import CalendarHandler, KeyHandler, LoginHandler, LogoutHandler
 from sickchill.views.api.webapi import ApiHandler
 
@@ -34,7 +35,6 @@ class SRWebServer(threading.Thread):  # pylint: disable=too-many-instance-attrib
         self.daemon = True
         self.alive = True
         self.name = "TORNADO"
-        self.io_loop = IOLoop.current()
 
         self.options = options or {}
         self.options.setdefault('port', 8081)
@@ -72,14 +72,14 @@ class SRWebServer(threading.Thread):  # pylint: disable=too-many-instance-attrib
 
         if self.enable_https:
             # If either the HTTPS certificate or key do not exist, make some self-signed ones.
-            if not (self.https_cert and ek(os.path.exists, self.https_cert)) or not (
-                    self.https_key and ek(os.path.exists, self.https_key)):
+            if not (self.https_cert and os.path.exists(self.https_cert)) or not (
+                    self.https_key and os.path.exists(self.https_key)):
                 if not create_https_certificates(self.https_cert, self.https_key):
                     logger.log("Unable to create CERT/KEY files, disabling HTTPS")
                     sickbeard.ENABLE_HTTPS = False
                     self.enable_https = False
 
-            if not (ek(os.path.exists, self.https_cert) and ek(os.path.exists, self.https_key)):
+            if not (os.path.exists(self.https_cert) and os.path.exists(self.https_key)):
                 logger.log("Disabled HTTPS because of missing CERT and KEY files", logger.WARNING)
                 sickbeard.ENABLE_HTTPS = False
                 self.enable_https = False
@@ -101,22 +101,22 @@ class SRWebServer(threading.Thread):  # pylint: disable=too-many-instance-attrib
         # Static File Handlers
         self.app.add_handlers(".*$", [
             url(r'{0}/favicon.ico'.format(self.options['web_root']), StaticFileHandler,
-                {"path": ek(os.path.join, self.options['data_root'], 'images/ico/favicon.ico')}, name='favicon'),
+                {"path": os.path.join(self.options['data_root'], 'images/ico/favicon.ico')}, name='favicon'),
 
             url(r'{0}/images/(.*)'.format(self.options['web_root']), StaticFileHandler,
-                {"path": ek(os.path.join, self.options['data_root'], 'images')}, name='images'),
+                {"path": os.path.join(self.options['data_root'], 'images')}, name='images'),
 
             url(r'{0}/cache/images/(.*)'.format(self.options['web_root']), StaticFileHandler,
-                {"path": ek(os.path.join, sickbeard.CACHE_DIR, 'images')}, name='image_cache'),
+                {"path": os.path.join(sickbeard.CACHE_DIR, 'images')}, name='image_cache'),
 
             url(r'{0}/css/(.*)'.format(self.options['web_root']), StaticFileHandler,
-                {"path": ek(os.path.join, self.options['data_root'], 'css')}, name='css'),
+                {"path": os.path.join(self.options['data_root'], 'css')}, name='css'),
 
             url(r'{0}/js/(.*)'.format(self.options['web_root']), StaticFileHandler,
-                {"path": ek(os.path.join, self.options['data_root'], 'js')}, name='js'),
+                {"path": os.path.join(self.options['data_root'], 'js')}, name='js'),
 
             url(r'{0}/fonts/(.*)'.format(self.options['web_root']), StaticFileHandler,
-                {"path": ek(os.path.join, self.options['data_root'], 'fonts')}, name='fonts')
+                {"path": os.path.join(self.options['data_root'], 'fonts')}, name='fonts')
 
             # TODO: WTF is this?
             # url(r'{0}/videos/(.*)'.format(self.options['web_root']), StaticFileHandler,
@@ -139,6 +139,8 @@ class SRWebServer(threading.Thread):  # pylint: disable=too-many-instance-attrib
         ] + Route.get_routes(self.options['web_root']))
 
     def run(self):
+        asyncio.set_event_loop(asyncio.new_event_loop())
+
         if self.enable_https:
             protocol = "https"
             ssl_options = {"certfile": self.https_cert, "keyfile": self.https_key}
@@ -170,12 +172,17 @@ class SRWebServer(threading.Thread):  # pylint: disable=too-many-instance-attrib
             os._exit(1)
 
         try:
-            self.io_loop.start()
-            self.io_loop.close(True)
-        except (IOError, ValueError):
+            logger.log("Starting IO Loop for SickChill on " + protocol + "://" + str(self.options['host']) + ":" + str(
+                self.options['port']) + "/", logger.DEBUG)
+            IOLoop.current().start()
+            logger.log("Finishing IO Loop for SickChill on " + protocol + "://" + str(self.options['host']) + ":" + str(
+                self.options['port']) + "/", logger.DEBUG)
+            IOLoop.current().close(True)
+        except (IOError, ValueError) as e:
+            logger.log("Received IOError or ValueError: " + repr(e), logger.DEBUG)
             # Ignore errors like "ValueError: I/O operation on closed kqueue fd". These might be thrown during a reload.
             pass
 
     def shutdown(self):
         self.alive = False
-        self.io_loop.stop()
+        IOLoop.current().stop()

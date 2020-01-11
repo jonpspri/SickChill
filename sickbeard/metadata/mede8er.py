@@ -18,7 +18,7 @@
 # You should have received a copy of the GNU General Public License
 # along with SickChill. If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import print_function, unicode_literals
+#
 
 import datetime
 import io
@@ -30,8 +30,7 @@ import sickbeard
 from sickbeard import helpers, logger
 from sickbeard.metadata import mediabrowser
 from sickchill.helper.common import dateFormat, replace_extension
-from sickchill.helper.encoding import ek
-from sickchill.helper.exceptions import ex, ShowNotFoundException
+from sickchill.helper.exceptions import ShowNotFoundException
 
 try:
     import xml.etree.cElementTree as etree
@@ -235,7 +234,7 @@ class Mede8erMetadata(mediabrowser.MediaBrowserMetadata):
         except sickbeard.indexer_shownotfound as e:
             raise ShowNotFoundException(e.message)
         except sickbeard.indexer_error as e:
-            logger.log("Unable to connect to TVDB while creating meta files - skipping - " + ex(e), logger.ERROR)
+            logger.log("Unable to connect to TVDB while creating meta files - skipping - " + repr(e), logger.ERROR)
             return False
 
         rootNode = etree.Element("details")
@@ -253,8 +252,8 @@ class Mede8erMetadata(mediabrowser.MediaBrowserMetadata):
             except (sickbeard.indexer_episodenotfound, sickbeard.indexer_seasonnotfound):
                 logger.log("Metadata writer is unable to find episode {0:d}x{1:d} of {2} on {3}..."
                            "has it been removed? Should I delete from db?".format(
-                    curEpToWrite.season, curEpToWrite.episode, curEpToWrite.show.name,
-                    sickbeard.indexerApi(ep_obj.show.indexer).name))
+                                curEpToWrite.season, curEpToWrite.episode, curEpToWrite.show.name,
+                                sickbeard.indexerApi(ep_obj.show.indexer).name))
                 return None
 
             if curEpToWrite == ep_obj:
@@ -372,12 +371,12 @@ class Mede8erMetadata(mediabrowser.MediaBrowserMetadata):
             return False
 
         nfo_file_path = self.get_show_file_path(show_obj)
-        nfo_file_dir = ek(os.path.dirname, nfo_file_path)
+        nfo_file_dir = os.path.dirname(nfo_file_path)
 
         try:
-            if not ek(os.path.isdir, nfo_file_dir):
+            if not os.path.isdir(nfo_file_dir):
                 logger.log("Metadata dir didn't exist, creating it at " + nfo_file_dir, logger.DEBUG)
-                ek(os.makedirs, nfo_file_dir)
+                os.makedirs(nfo_file_dir)
                 helpers.chmodAsParent(nfo_file_dir)
 
             logger.log("Writing show nfo file to " + nfo_file_path, logger.DEBUG)
@@ -388,7 +387,7 @@ class Mede8erMetadata(mediabrowser.MediaBrowserMetadata):
             nfo_file.close()
             helpers.chmodAsParent(nfo_file_path)
         except IOError as e:
-            logger.log("Unable to write file to " + nfo_file_path + " - are you sure the folder is writable? " + ex(e),
+            logger.log("Unable to write file to " + nfo_file_path + " - are you sure the folder is writable? " + repr(e),
                        logger.ERROR)
             return False
 
@@ -417,12 +416,12 @@ class Mede8erMetadata(mediabrowser.MediaBrowserMetadata):
             return False
 
         nfo_file_path = self.get_episode_file_path(ep_obj)
-        nfo_file_dir = ek(os.path.dirname, nfo_file_path)
+        nfo_file_dir = os.path.dirname(nfo_file_path)
 
         try:
-            if not ek(os.path.isdir, nfo_file_dir):
+            if not os.path.isdir(nfo_file_dir):
                 logger.log("Metadata dir didn't exist, creating it at " + nfo_file_dir, logger.DEBUG)
-                ek(os.makedirs, nfo_file_dir)
+                os.makedirs(nfo_file_dir)
                 helpers.chmodAsParent(nfo_file_dir)
 
             logger.log("Writing episode nfo file to " + nfo_file_path, logger.DEBUG)
@@ -433,11 +432,12 @@ class Mede8erMetadata(mediabrowser.MediaBrowserMetadata):
             nfo_file.close()
             helpers.chmodAsParent(nfo_file_path)
         except IOError as e:
-            logger.log("Unable to write file to " + nfo_file_path + " - are you sure the folder is writable? " + ex(e),
+            logger.log("Unable to write file to " + nfo_file_path + " - are you sure the folder is writable? " + repr(e),
                        logger.ERROR)
             return False
 
         return True
+
 
 # present a standard "interface" from the module
 metadata_class = Mede8erMetadata

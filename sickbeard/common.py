@@ -23,7 +23,7 @@ Common interface for Quality and Status
 """
 
 # pylint: disable=line-too-long
-from __future__ import unicode_literals
+#
 
 import gettext
 import operator

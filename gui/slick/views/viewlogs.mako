@@ -16,8 +16,8 @@
                     <span>${_('Level')}:</span>
                     <select name="min_level" id="min_level" class="form-control form-control-inline input-sm" title="Minimum log level">
                         <%
-                            levels = LOGGING_LEVELS.keys()
-                            levels.sort(key=lambda x: LOGGING_LEVELS[x])
+                            levels = sorted(LOGGING_LEVELS.keys(),
+                                            key=lambda x: LOGGING_LEVELS[x])
                             if not sickbeard.DEBUG:
                                 levels.remove('DEBUG')
                             if not sickbeard.DBDEBUG:

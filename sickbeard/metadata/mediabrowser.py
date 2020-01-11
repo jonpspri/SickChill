@@ -18,20 +18,17 @@
 # You should have received a copy of the GNU General Public License
 # along with SickChill. If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import print_function, unicode_literals
+#
 
 import datetime
 import os
 import re
 
-import six
-
 import sickbeard
 from sickbeard import helpers, logger
 from sickbeard.metadata import generic
 from sickchill.helper.common import dateFormat, replace_extension
-from sickchill.helper.encoding import ek
-from sickchill.helper.exceptions import ex, ShowNotFoundException
+from sickchill.helper.exceptions import ShowNotFoundException
 
 try:
     import xml.etree.cElementTree as etree
@@ -117,10 +114,10 @@ class MediaBrowserMetadata(generic.GenericMetadata):
         ep_obj: a TVEpisode object to get the path for
         """
 
-        if ek(os.path.isfile, ep_obj.location):
-            xml_file_name = replace_extension(ek(os.path.basename, ep_obj.location), self._ep_nfo_extension)
-            metadata_dir_name = ek(os.path.join, ek(os.path.dirname, ep_obj.location), 'metadata')
-            xml_file_path = ek(os.path.join, metadata_dir_name, xml_file_name)
+        if os.path.isfile(ep_obj.location):
+            xml_file_name = replace_extension(os.path.basename(ep_obj.location), self._ep_nfo_extension)
+            metadata_dir_name = os.path.join(os.path.dirname(ep_obj.location), 'metadata')
+            xml_file_path = os.path.join(metadata_dir_name, xml_file_name)
         else:
             logger.log("Episode location doesn't exist: " + str(ep_obj.location), logger.DEBUG)
             return ''
@@ -136,10 +133,10 @@ class MediaBrowserMetadata(generic.GenericMetadata):
         ep_obj: a TVEpisode object to get the path from
         """
 
-        if ek(os.path.isfile, ep_obj.location):
-            tbn_file_name = replace_extension(ek(os.path.basename, ep_obj.location), 'jpg')
-            metadata_dir_name = ek(os.path.join, ek(os.path.dirname, ep_obj.location), 'metadata')
-            tbn_file_path = ek(os.path.join, metadata_dir_name, tbn_file_name)
+        if os.path.isfile(ep_obj.location):
+            tbn_file_name = replace_extension(os.path.basename(ep_obj.location), 'jpg')
+            metadata_dir_name = os.path.join(os.path.dirname(ep_obj.location), 'metadata')
+            tbn_file_path = os.path.join(metadata_dir_name, tbn_file_name)
         else:
             return None
 
@@ -153,8 +150,8 @@ class MediaBrowserMetadata(generic.GenericMetadata):
         If no season folder exists, None is returned
         """
 
-        dir_list = [x for x in ek(os.listdir, show_obj.location) if
-                    ek(os.path.isdir, ek(os.path.join, show_obj.location, x))]
+        dir_list = [x for x in os.listdir(show_obj.location) if
+                    os.path.isdir(os.path.join(show_obj.location, x))]
 
         season_dir_regex = r'^Season\s+(\d+)$'
 
@@ -184,7 +181,7 @@ class MediaBrowserMetadata(generic.GenericMetadata):
 
         logger.log("Using " + str(season_dir) + "/folder.jpg as season dir for season " + str(season), logger.DEBUG)
 
-        return ek(os.path.join, show_obj.location, season_dir, 'folder.jpg')
+        return os.path.join(show_obj.location, season_dir, 'folder.jpg')
 
     @staticmethod
     def get_season_banner_path(show_obj, season):
@@ -194,8 +191,8 @@ class MediaBrowserMetadata(generic.GenericMetadata):
         If no season folder exists, None is returned
         """
 
-        dir_list = [x for x in ek(os.listdir, show_obj.location) if
-                    ek(os.path.isdir, ek(os.path.join, show_obj.location, x))]
+        dir_list = [x for x in os.listdir(show_obj.location) if
+                    os.path.isdir(os.path.join(show_obj.location, x))]
 
         season_dir_regex = r'^Season\s+(\d+)$'
 
@@ -225,7 +222,7 @@ class MediaBrowserMetadata(generic.GenericMetadata):
 
         logger.log("Using " + str(season_dir) + "/banner.jpg as season dir for season " + str(season), logger.DEBUG)
 
-        return ek(os.path.join, show_obj.location, season_dir, 'banner.jpg')
+        return os.path.join(show_obj.location, season_dir, 'banner.jpg')
 
     def _show_data(self, show_obj):
         """
@@ -353,7 +350,7 @@ class MediaBrowserMetadata(generic.GenericMetadata):
             Zap2ItId = etree.SubElement(tv_node, "Zap2ItId")
             Zap2ItId.text = myShow['zap2it_id']
 
-        if getattr(myShow, 'genre', None) and isinstance(myShow["genre"], six.string_types):
+        if getattr(myShow, 'genre', None):
             Genres = etree.SubElement(tv_node, "Genres")
             for genre in myShow['genre'].split('|'):
                 if genre.strip():
@@ -427,7 +424,7 @@ class MediaBrowserMetadata(generic.GenericMetadata):
             raise ShowNotFoundException(e.message)
         except sickbeard.indexer_error as e:
             logger.log("Unable to connect to " + sickbeard.indexerApi(
-                ep_obj.show.indexer).name + " while creating meta files - skipping - " + ex(e), logger.ERROR)
+                ep_obj.show.indexer).name + " while creating meta files - skipping - " + repr(e), logger.ERROR)
             return False
 
         rootNode = etree.Element("Item")
@@ -440,8 +437,8 @@ class MediaBrowserMetadata(generic.GenericMetadata):
             except (sickbeard.indexer_episodenotfound, sickbeard.indexer_seasonnotfound):
                 logger.log("Metadata writer is unable to find episode {0:d}x{1:d} of {2} on {3}..."
                            "has it been removed? Should I delete from db?".format(
-                    curEpToWrite.season, curEpToWrite.episode, curEpToWrite.show.name,
-                    sickbeard.indexerApi(ep_obj.show.indexer).name))
+                                curEpToWrite.season, curEpToWrite.episode, curEpToWrite.show.name,
+                                sickbeard.indexerApi(ep_obj.show.indexer).name))
                 return None
 
             if curEpToWrite == ep_obj:
@@ -561,7 +558,7 @@ class MediaBrowserMetadata(generic.GenericMetadata):
                 persons_dict['Writer'] += [x.strip() for x in myEp['writer'].split('|') if x.strip()]
 
         # fill in Persons section with collected directors, guest starts and writers
-        for person_type, names in six.iteritems(persons_dict):
+        for person_type, names in persons_dict.items():
             # remove doubles
             names = list(set(names))
             for cur_name in names:

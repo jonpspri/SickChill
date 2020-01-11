@@ -18,7 +18,7 @@
 # You should have received a copy of the GNU General Public License
 # along with SickChill. If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import print_function, unicode_literals
+#
 
 import base64
 import socket
@@ -29,8 +29,6 @@ from six.moves import http_client, urllib
 
 import sickbeard
 from sickbeard import common, logger
-from sickchill.helper.encoding import ss
-from sickchill.helper.exceptions import ex
 
 try:
     import xml.etree.cElementTree as etree
@@ -134,7 +132,7 @@ class Notifier(object):
             if kodiapi:
                 if kodiapi <= 4:
                     logger.log("Detected {0} version <= 11, using {1} HTTP API".format(dest_app, dest_app), logger.DEBUG)
-                    command = {'command': 'ExecBuiltIn',
+                    command = {'command': 'repr(e)cBuiltIn',
                                'parameter': 'Notification(' + title.encode("utf-8") + ',' + message.encode(
                                    "utf-8") + ')'}
                     notifyResult = self._send_to_kodi(command, curHost, username, password)
@@ -146,7 +144,7 @@ class Notifier(object):
                         title.encode("utf-8"), message.encode("utf-8"), sickbeard.LOGO_URL)
                     notifyResult = self._send_to_kodi_json(command, curHost, username, password, dest_app)
                     if notifyResult and notifyResult.get('result'):  # pylint: disable=no-member
-                        result += curHost + ':' + notifyResult["result"].decode(sickbeard.SYS_ENCODING)
+                        result += curHost + ':' + notifyResult["result"]
             else:
                 if sickbeard.KODI_ALWAYS_ON or force:
                     logger.log("Failed to detect {0} version for '{1}', check configuration and try again.".format(dest_app, curHost), logger.WARNING)
@@ -236,24 +234,24 @@ class Notifier(object):
                 base64string = base64.encodestring('{0}:{1}'.format(username, password))[:-1]
                 authheader = "Basic {0}".format(base64string)
                 req.add_header("Authorization", authheader)
-                logger.log("Contacting {0} (with auth header) via url: {1}".format(dest_app, ss(url)), logger.DEBUG)
+                logger.log("Contacting {0} (with auth header) via url: {1}".format(dest_app, url), logger.DEBUG)
             else:
-                logger.log("Contacting {0} via url: {1}".format(dest_app, ss(url)), logger.DEBUG)
+                logger.log("Contacting {0} via url: {1}".format(dest_app, url), logger.DEBUG)
 
             try:
                 response = urllib.request.urlopen(req)
             except (http_client.BadStatusLine, urllib.error.URLError) as e:
-                logger.log("Couldn't contact {0} HTTP at {1!r} : {2!r}".format(dest_app, url, ex(e)), logger.DEBUG)
+                logger.log("Couldn't contact {0} HTTP at {1!r} : {2!r}".format(dest_app, url, repr(e)), logger.DEBUG)
                 return False
 
-            result = response.read().decode(sickbeard.SYS_ENCODING)
+            result = response.read()
             response.close()
 
             logger.log("{0} HTTP response: {1}".format(dest_app, result.replace('\n', '')), logger.DEBUG)
             return result
 
         except Exception as e:
-            logger.log("Couldn't contact {0} HTTP at {1!r} : {2!r}".format(dest_app, url, ex(e)), logger.DEBUG)
+            logger.log("Couldn't contact {0} HTTP at {1!r} : {2!r}".format(dest_app, url, repr(e)), logger.DEBUG)
             return False
 
     def _update_library(self, host=None, showName=None):  # pylint: disable=too-many-locals, too-many-return-statements
@@ -282,8 +280,8 @@ class Notifier(object):
             logger.log("Updating library in KODI via HTTP method for show " + showName, logger.DEBUG)
 
             pathSql = ('select path.strPath from path, tvshow, tvshowlinkpath where '
-                      'tvshow.c00 = "{}" and tvshowlinkpath.idShow = tvshow.idShow '
-                      'and tvshowlinkpath.idPath = path.idPath').format(showName)
+                       'tvshow.c00 = "{}" and tvshowlinkpath.idShow = tvshow.idShow '
+                       'and tvshowlinkpath.idPath = path.idPath').format(showName)
 
             # use this to get xml back for the path lookups
             xmlCommand = {
@@ -309,7 +307,7 @@ class Notifier(object):
             try:
                 et = etree.fromstring(encSqlXML)
             except SyntaxError as e:
-                logger.log("Unable to parse XML returned from KODI: " + ex(e), logger.ERROR)
+                logger.log("Unable to parse XML returned from KODI: " + repr(e), logger.ERROR)
                 return False
 
             paths = et.findall('.//field')
@@ -320,9 +318,9 @@ class Notifier(object):
 
             for path in paths:
                 # we do not need it double-encoded, gawd this is dumb
-                unEncPath = urllib.parse.unquote(path.text).decode(sickbeard.SYS_ENCODING)
+                unEncPath = urllib.parse.unquote(path.text)
                 logger.log("KODI Updating " + showName + " on " + host + " at " + unEncPath, logger.DEBUG)
-                updateCommand = {'command': 'ExecBuiltIn', 'parameter': 'KODI.updatelibrary(video, {0})'.format(unEncPath)}
+                updateCommand = {'command': 'repr(e)cBuiltIn', 'parameter': 'KODI.updatelibrary(video, {0})'.format(unEncPath)}
                 request = self._send_to_kodi(updateCommand, host)
                 if not request:
                     logger.log("Update of show directory failed on " + showName + " on " + host + " at " + unEncPath, logger.WARNING)
@@ -333,7 +331,7 @@ class Notifier(object):
         # do a full update if requested
         else:
             logger.log("Doing Full Library KODI update on host: " + host, logger.DEBUG)
-            updateCommand = {'command': 'ExecBuiltIn', 'parameter': 'KODI.updatelibrary(video)'}
+            updateCommand = {'command': 'repr(e)cBuiltIn', 'parameter': 'KODI.updatelibrary(video)'}
             request = self._send_to_kodi(updateCommand, host)
 
             if not request:
@@ -383,15 +381,15 @@ class Notifier(object):
                 base64string = base64.encodestring('{0}:{1}'.format(username, password))[:-1]
                 authheader = "Basic {0}".format(base64string)
                 req.add_header("Authorization", authheader)
-                logger.log("Contacting {0} (with auth header) via url: {1}".format(dest_app, ss(url)), logger.DEBUG)
+                logger.log("Contacting {0} (with auth header) via url: {1}".format(dest_app, url), logger.DEBUG)
             else:
-                logger.log("Contacting {0} via url: {1}".format(dest_app, ss(url)), logger.DEBUG)
+                logger.log("Contacting {0} via url: {1}".format(dest_app, url), logger.DEBUG)
 
             try:
                 response = urllib.request.urlopen(req)
             except (http_client.BadStatusLine, urllib.error.URLError) as e:
                 if sickbeard.KODI_ALWAYS_ON:
-                    logger.log("Error while trying to retrieve {0} API version for {1}: {2!r}".format(dest_app, host, ex(e)), logger.WARNING)
+                    logger.log("Error while trying to retrieve {0} API version for {1}: {2!r}".format(dest_app, host, repr(e)), logger.WARNING)
                 return False
 
             # parse the json result
@@ -400,13 +398,13 @@ class Notifier(object):
                 response.close()
                 logger.log("{0} JSON response: {1}".format(dest_app, result), logger.DEBUG)
                 return result  # need to return response for parsing
-            except ValueError as e:
+            except ValueError:
                 logger.log("Unable to decode JSON: " + str(response.read()), logger.WARNING)
                 return False
 
         except IOError as e:
             if sickbeard.KODI_ALWAYS_ON:
-                logger.log("Warning: Couldn't contact {0} JSON API at {1}: {2!r}".format(dest_app, ss(url), ex(e)), logger.WARNING)
+                logger.log("Warning: Couldn't contact {0} JSON API at {1}: {2!r}".format(dest_app, url, repr(e)), logger.WARNING)
             return False
 
     def _update_library_json(self, host=None, showName=None):  # pylint: disable=too-many-return-statements, too-many-branches

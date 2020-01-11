@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*
 # Author: Nic Wolfe <nic@wolfeden.ca>
 # URL: http://code.google.com/p/sickbeard/
@@ -21,7 +21,7 @@
 # You should have received a copy of the GNU General Public License
 # along with SickChill. If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import print_function, unicode_literals
+#
 
 import codecs
 import datetime
@@ -385,12 +385,12 @@ class SickChill(object):
         sickbeard.showList = []
         for sql_show in sql_results:
             try:
-                cur_show = TVShow(sql_show[b'indexer'], sql_show[b'indexer_id'])
+                cur_show = TVShow(sql_show['indexer'], sql_show['indexer_id'])
                 cur_show.nextEpisode()
                 sickbeard.showList.append(cur_show)
             except Exception as error:  # pylint: disable=broad-except
                 logger.log('There was an error creating the show in {0}: Error {1}'.format
-                           (sql_show[b'location'], error), logger.ERROR)
+                           (sql_show['location'], error), logger.ERROR)
                 logger.log(traceback.format_exc(), logger.DEBUG)
 
     @staticmethod

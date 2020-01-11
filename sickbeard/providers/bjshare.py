@@ -20,7 +20,7 @@
 
 """Provider code for BJ-Share."""
 
-from __future__ import unicode_literals
+#
 
 import re
 

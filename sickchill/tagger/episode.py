@@ -4,7 +4,7 @@
 Episode tagger to extract information from episodes
 """
 
-from __future__ import print_function, unicode_literals
+#
 
 import re
 

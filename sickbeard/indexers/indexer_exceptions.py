@@ -19,7 +19,7 @@
 
 """Custom exceptions used or raised by indexer_api"""
 
-from __future__ import unicode_literals
+#
 
 from tvdb_api.tvdb_api import (tvdb_attributenotfound, tvdb_episodenotfound, tvdb_error, tvdb_exception, tvdb_seasonnotfound, #tvdb_showincomplete,
                                       tvdb_shownotfound, tvdb_userabort)

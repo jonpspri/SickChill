@@ -22,7 +22,7 @@
 Custom Logger for SickChill
 """
 
-from __future__ import print_function, unicode_literals
+#
 
 import io
 import locale
@@ -36,7 +36,7 @@ import threading
 import traceback
 from logging import NullHandler
 
-import six
+# import six
 from github import InputFileContent
 from github.GithubException import RateLimitExceededException, TwoFactorException
 # noinspection PyUnresolvedReferences
@@ -45,8 +45,8 @@ from requests.compat import quote
 import sickbeard
 from sickbeard import classes
 from sickchill.helper.common import dateTimeFormat
-from sickchill.helper.encoding import ek, ss
-from sickchill.helper.exceptions import ex
+# from sickchill.helper.encoding import ek, ss
+# from sickchill.helper.exceptions import ex
 
 # pylint: disable=line-too-long
 
@@ -84,22 +84,15 @@ class CensoredFormatter(logging.Formatter, object):
         """
         msg = super(CensoredFormatter, self).format(record)
 
-        if not isinstance(msg, six.text_type):
-            msg = msg.decode(self.encoding, 'replace')  # Convert to unicode
-
         # set of censored items
-        censored = {item for _, item in six.iteritems(censored_items) if item}
+        censored = {item for _, item in censored_items.items() if item}
+
         # set of censored items and urlencoded counterparts
         censored = censored | {quote(item) for item in censored}
-        # convert set items to unicode and typecast to list
-        censored = list({
-            item.decode(self.encoding, 'replace')
-            if not isinstance(item, six.text_type) else item
-            for item in censored
-        })
+
         # sort the list in order of descending length so that entire item is censored
         # e.g. password and password_1 both get censored instead of getting ********_1
-        censored.sort(key=len, reverse=True)
+        censored = sorted(censored, key=len, reverse=True)
 
         for item in censored:
             msg = msg.replace(item, len(item) * '*')
@@ -143,7 +136,7 @@ class Logger(object):  # pylint: disable=too-many-instance-attributes
         :param debug_logging: True if debug logging is enabled
         :param database_logging: True if logging database access
         """
-        self.log_file = self.log_file or ek(os.path.join, sickbeard.LOG_DIR, 'sickchill.log')
+        self.log_file = self.log_file or os.path.join(sickbeard.LOG_DIR, 'sickchill.log')
 
         global log_file
         log_file = self.log_file
@@ -258,7 +251,7 @@ class Logger(object):  # pylint: disable=too-many-instance-attributes
         self.log(error_msg, ERROR, *args, **kwargs)
 
         if not self.console_logging:
-            sys.exit(error_msg.encode(sickbeard.SYS_ENCODING, 'xmlcharrefreplace'))
+            sys.exit(error_msg)
         else:
             sys.exit(1)
 
@@ -297,13 +290,13 @@ class Logger(object):  # pylint: disable=too-many-instance-attributes
             # read log file
             __log_data = None
 
-            if ek(os.path.isfile, self.log_file):
+            if os.path.isfile(self.log_file):
                 with io.open(self.log_file, encoding='utf-8') as log_f:
                     __log_data = log_f.readlines()
 
             for i in range(1, int(sickbeard.LOG_NR)):
                 f_name = '{0}.{1:d}'.format(self.log_file, i)
-                if ek(os.path.isfile, f_name) and (len(__log_data) <= 500):
+                if os.path.isfile(f_name) and (len(__log_data) <= 500):
                     with io.open(f_name, encoding='utf-8') as log_f:
                         __log_data += log_f.readlines()
 
@@ -312,15 +305,15 @@ class Logger(object):  # pylint: disable=too-many-instance-attributes
             # parse and submit errors to issue tracker
             for cur_error in sorted(classes.ErrorViewer.errors, key=lambda error: error.time, reverse=True)[:500]:
                 try:
-                    title_error = ss(str(cur_error.title))
+                    title_error = str(cur_error.title)
                     if not title_error or title_error == 'None':
-                        title_error = re.match(r'^[A-Za-z0-9\-\[\] :]+::\s(?:\[[\w]{7}\])\s*(.*)$', ss(cur_error.message)).group(1)
+                        title_error = re.match(r'^[A-Za-z0-9\-\[\] :]+::\s(?:\[[\w]{7}\])\s*(.*)$', str(cur_error.message)).group(1)
 
                     if len(title_error) > 1000:
                         title_error = title_error[0:1000]
 
                 except Exception as err_msg:  # pylint: disable=broad-except
-                    self.log('Unable to get error title : {0}'.format(ex(err_msg)), ERROR)
+                    self.log('Unable to get error title : {0}'.format(repr(err_msg)), ERROR)
                     title_error = 'UNKNOWN'
 
                 gist = None
@@ -467,6 +460,7 @@ def shutdown():
 def submit_errors(*args, **kwargs):
     return Wrapper.instance.submit_errors(*args, **kwargs)
 
+
 log_file = None
 
 LOG_FILTERS = {
@@ -502,12 +496,12 @@ def log_data(min_level, log_filter, log_search, max_lines):
     final_data = []
 
     log_files = []
-    if ek(os.path.isfile, Wrapper.instance.log_file):
+    if os.path.isfile(Wrapper.instance.log_file):
         log_files.append(Wrapper.instance.log_file)
 
         for i in range(1, int(sickbeard.LOG_NR)):
             name = Wrapper.instance.log_file + "." + str(i)
-            if not ek(os.path.isfile, name):
+            if not os.path.isfile(name):
                 break
             log_files.append(name)
     else:

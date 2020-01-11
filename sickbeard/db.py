@@ -18,7 +18,7 @@
 # You should have received a copy of the GNU General Public License
 # along with SickChill. If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import print_function, unicode_literals
+#
 
 import os.path
 import re
@@ -28,12 +28,8 @@ import time
 import warnings
 from sqlite3 import OperationalError
 
-import six
-
 import sickbeard
 from sickbeard import logger
-from sickchill.helper.encoding import ek
-from sickchill.helper.exceptions import ex
 
 db_cons = {}
 db_locks = {}
@@ -49,7 +45,7 @@ def db_full_path(filename="sickbeard.db", suffix=None):
     """
     if suffix:
         filename = "{0}.{1}".format(filename, suffix)
-    return ek(os.path.join, sickbeard.DATA_DIR, filename)
+    return os.path.join(sickbeard.DATA_DIR, filename)
 
 
 class DBConnection(object):
@@ -66,7 +62,6 @@ class DBConnection(object):
                 db_locks[self.filename] = threading.Lock()
 
                 self.connection = sqlite3.connect(self.full_path, 20, check_same_thread=False)
-                self.connection.text_factory = DBConnection._unicode_text_factory
 
                 db_cons[self.filename] = self.connection
             else:
@@ -95,7 +90,7 @@ class DBConnection(object):
             logger.log(
                 _("{exception_severity} error executing query with {method} in database {db_location}: ").format(
                     db_location=self.full_path, method=called_method, exception_severity=prefix
-                ) + ex(exception), severity
+                ) + str(exception), severity
             )
 
             # Lets print out all of the arguments so we can debug this better
@@ -103,7 +98,7 @@ class DBConnection(object):
             logger.log(_("If this happened in cache.db, you can safely stop SickChill, and delete the cache.db file without losing any data"))
             # noinspection PyUnresolvedReferences
             logger.log(
-                _("Here is the arguments that were passed to this function (This is what the developers need to know): {local_variables:s}").format(
+                _("Here is the arguments that were passed to this function (This is what the developers need to know): {local_variables}").format(
                     local_variables=local_variables
                 )
             )
@@ -225,7 +220,7 @@ class DBConnection(object):
                             sql_results.append(self._execute(qu[0], fetchall=fetchall))
                         elif len(qu) > 1:
                             # noinspection PyUnresolvedReferences
-                            logger.log(_("{filename}: {query} with args {args:s}").format(filename=self.filename, query=qu[0], args=qu[1]), log_level)
+                            logger.log(_("{filename}: {query} with args {args}").format(filename=self.filename, query=qu[0], args=qu[1]), log_level)
                             sql_results.append(self._execute(qu[0], qu[1], fetchall=fetchall))
                     self.connection.commit()
                     # noinspection PyUnresolvedReferences
@@ -278,7 +273,7 @@ class DBConnection(object):
                     if args is None:
                         logger.log(self.filename + ": " + query, logger.DB)
                     else:
-                        logger.log("{filename}: {query} with args {args:s}".format(filename=self.filename, query=query, args=args), logger.DB)
+                        logger.log("{filename}: {query} with args {args}".format(filename=self.filename, query=query, args=args), logger.DB)
 
                     sql_results = self._execute(query, args, fetchall=fetchall, fetchone=fetchone)
                     self.connection.commit()
@@ -359,14 +354,14 @@ class DBConnection(object):
                 table=table_name, pairs=make_string(value_dict, ", "), control=make_string(key_dict, " AND ")
             )
 
-            self.action(query, value_dict.values() + key_dict.values())
+            self.action(query, list(value_dict.values()) + list(key_dict.values()))
 
         if self.connection.total_changes == changesBefore:
-            keys = value_dict.keys() + key_dict.keys()
+            keys = list(value_dict.keys()) + list(key_dict.keys())
             count = len(keys)
             columns = ", ".join(keys)
             replacements = ", ".join(["?"] * count)
-            values = value_dict.values() + key_dict.values()
+            values = list(value_dict.values()) + list(key_dict.values())
 
             query = "INSERT INTO '{table}' ({columns}) VALUES ({replacements})".format(table=table_name, columns=columns, replacements=replacements)
 
@@ -379,22 +374,7 @@ class DBConnection(object):
         :param table_name: name of table
         :return: array of name/type info
         """
-        return {column[b"name"]: {"type": column[b"type"]} for column in self.select("PRAGMA table_info(`{0}`)".format(table_name))}
-
-    @staticmethod
-    def _unicode_text_factory(x):
-        """
-        Convert text to six.text_type
-
-        :param x: text to parse
-        :return: six.text_type result
-        """
-        # noinspection PyBroadException
-        try:
-            # Just revert to the old code for now, until we can fix unicode
-            return six.text_type(x, "utf-8")
-        except Exception:
-            return six.text_type(x, sickbeard.SYS_ENCODING, errors="ignore")
+        return {column["name"]: {"type": column["type"]} for column in self.select("PRAGMA table_info(`{0}`)".format(table_name))}
 
     @staticmethod
     def _dict_factory(cursor, row):
@@ -487,7 +467,7 @@ def _process_upgrade(connection, upgrade_class):
         try:
             instance.execute()
         except Exception as e:
-            logger.log("Error in " + str(upgrade_class.__name__) + ": " + ex(e), logger.ERROR)
+            logger.log("Error in " + str(upgrade_class.__name__) + ": " + str(e), logger.ERROR)
             raise
 
         logger.log(upgrade_class.__name__ + " upgrade completed", logger.DEBUG)

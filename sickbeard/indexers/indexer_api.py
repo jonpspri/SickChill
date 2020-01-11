@@ -18,7 +18,7 @@
 # You should have received a copy of the GNU General Public License
 # along with SickChill. If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import unicode_literals
+#
 
 import os
 
@@ -26,7 +26,6 @@ from .indexer_config import indexerConfig, initConfig
 
 import sickbeard
 from sickchill.helper.common import try_int
-from sickchill.helper.encoding import ek
 
 
 class indexerApi(object):
@@ -60,7 +59,7 @@ class indexerApi(object):
     def api_params(self):
         if self.indexerID:
             if sickbeard.CACHE_DIR:
-                indexerConfig[self.indexerID]['api_params']['cache'] = ek(os.path.join, sickbeard.CACHE_DIR, 'indexers', self.name)
+                indexerConfig[self.indexerID]['api_params']['cache'] = os.path.join(sickbeard.CACHE_DIR, 'indexers', self.name)
             if sickbeard.PROXY_SETTING and sickbeard.PROXY_INDEXERS:
                 indexerConfig[self.indexerID]['api_params']['proxy'] = sickbeard.PROXY_SETTING
 

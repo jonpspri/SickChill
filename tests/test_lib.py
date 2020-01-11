@@ -39,7 +39,7 @@ Classes:
     TestCacheDBConnection
 """
 
-from __future__ import print_function, unicode_literals
+#
 
 import os.path
 import shutil
@@ -101,8 +101,6 @@ def create_test_cache_folder():
 # =================
 #  SickBeard globals
 # =================
-sickbeard.SYS_ENCODING = 'UTF-8'
-
 sickbeard.showList = []
 sickbeard.QUALITY_DEFAULT = 4  # hdtv
 sickbeard.SEASON_FOLDERS_DEFAULT = 0

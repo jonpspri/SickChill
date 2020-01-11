@@ -18,7 +18,7 @@
 # You should have received a copy of the GNU General Public License
 # along with SickChill. If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import unicode_literals
+#
 
 import datetime
 import functools
@@ -169,7 +169,7 @@ class sbdatetime(datetime.datetime):
             except Exception:
                 sbdatetime.has_locale = False
 
-        return strt.decode(sickbeard.SYS_ENCODING)
+        return strt
 
     # display Date in SickChill Format
     @static_or_instance
@@ -208,7 +208,7 @@ class sbdatetime(datetime.datetime):
             except Exception:
                 pass
 
-        return strd.decode(sickbeard.SYS_ENCODING)
+        return strd
 
     # display Datetime in SickChill Format
     @static_or_instance
@@ -279,4 +279,4 @@ class sbdatetime(datetime.datetime):
             except Exception:
                 sbdatetime.has_locale = False
 
-        return strd.decode(sickbeard.SYS_ENCODING)
+        return strd

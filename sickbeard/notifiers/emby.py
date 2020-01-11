@@ -18,13 +18,12 @@
 # You should have received a copy of the GNU General Public License
 # along with SickChill. If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import print_function, unicode_literals
+#
 
 from six.moves import urllib
 
 import sickbeard
 from sickbeard import logger
-from sickchill.helper.exceptions import ex
 
 try:
     import json
@@ -64,7 +63,7 @@ class Notifier(object):
             return True
 
         except (urllib.error.URLError, IOError) as e:
-            logger.log('EMBY: Warning: Couldn\'t contact Emby at ' + url + ' ' + ex(e), logger.WARNING)
+            logger.log('EMBY: Warning: Couldn\'t contact Emby at ' + url + ' ' + repr(e), logger.WARNING)
             return False
 
 
@@ -117,5 +116,5 @@ class Notifier(object):
                 return True
 
             except (urllib.error.URLError, IOError) as e:
-                logger.log('EMBY: Warning: Couldn\'t contact Emby at ' + url + ' ' + ex(e), logger.WARNING)
+                logger.log('EMBY: Warning: Couldn\'t contact Emby at ' + url + ' ' + repr(e), logger.WARNING)
                 return False

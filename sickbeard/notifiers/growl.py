@@ -18,7 +18,7 @@
 # You should have received a copy of the GNU General Public License
 # along with SickChill. If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import print_function, unicode_literals
+#
 
 import socket
 
@@ -26,7 +26,6 @@ from libgrowl import gntp
 
 import sickbeard
 from sickbeard import common, logger
-from sickchill.helper.exceptions import ex
 
 
 class Notifier(object):
@@ -150,7 +149,7 @@ class Notifier(object):
                     else:
                         return False
             except Exception as e:
-                logger.log("GROWL: Unable to send growl to " + opts['host'] + ":" + str(opts['port']) + " - " + ex(e), logger.WARNING)
+                logger.log("GROWL: Unable to send growl to " + opts['host'] + ":" + str(opts['port']) + " - " + repr(e), logger.WARNING)
                 return False
 
     def _sendRegistration(self, host=None, password=None, name='SickChill Notification'):
@@ -193,5 +192,5 @@ class Notifier(object):
         try:
             return self._send(opts['host'], opts['port'], register.encode(), opts['debug'])
         except Exception as e:
-            logger.log("GROWL: Unable to send growl to " + opts['host'] + ":" + str(opts['port']) + " - " + ex(e), logger.WARNING)
+            logger.log("GROWL: Unable to send growl to " + opts['host'] + ":" + str(opts['port']) + " - " + repr(e), logger.WARNING)
             return False

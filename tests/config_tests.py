@@ -52,7 +52,7 @@ Methods
 """
 
 # pylint: disable=line-too-long
-from __future__ import absolute_import, unicode_literals
+#
 
 import logging
 import os.path

@@ -18,7 +18,7 @@
 # You should have received a copy of the GNU General Public License
 # along with SickChill. If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import print_function, unicode_literals
+#
 
 import datetime
 import io
@@ -1539,8 +1539,7 @@ class CMDSickBeardCheckScheduler(ApiCall):
 
         backlog_paused = sickbeard.searchQueueScheduler.action.is_backlog_paused()  # @UndefinedVariable
         backlog_running = sickbeard.searchQueueScheduler.action.is_backlog_in_progress()  # @UndefinedVariable
-        next_backlog = sickbeard.backlogSearchScheduler.nextRun().strftime(dateFormat).decode(sickbeard.SYS_ENCODING)
-
+        next_backlog = sickbeard.backlogSearchScheduler.nextRun().strftime(dateFormat)
         data = {
             "backlog_is_paused": int(backlog_paused), "backlog_is_running": int(backlog_running),
             "last_backlog": _ordinal_to_date_form(sql_results[0][b"last_backlog"]),

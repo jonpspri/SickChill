@@ -18,7 +18,7 @@
 # along with SickChill. If not, see <http://www.gnu.org/licenses/>.
 # pylint: disable=too-many-lines
 
-from __future__ import unicode_literals
+#
 
 import datetime
 import os.path
@@ -2232,32 +2232,32 @@ class TVEpisode(object):  # pylint: disable=too-many-instance-attributes, too-ma
         result_name = pattern
 
         # if there's no release group in the db, let the user know we replaced it
-        if replace_map[b'%RG'] and replace_map[b'%RG'] != 'SickChill':
+        if replace_map['%RG'] and replace_map['%RG'] != 'SickChill':
             if not hasattr(self, '_release_group'):
-                logger.log("Episode has no release group, replacing it with '" + replace_map[b'%RG'] + "'", logger.DEBUG)
-                self._release_group = replace_map[b'%RG']  # if release_group is not in the db, put it there
+                logger.log("Episode has no release group, replacing it with '" + replace_map['%RG'] + "'", logger.DEBUG)
+                self._release_group = replace_map['%RG']  # if release_group is not in the db, put it there
             elif not self._release_group:
-                logger.log("Episode has no release group, replacing it with '" + replace_map[b'%RG'] + "'", logger.DEBUG)
-                self._release_group = replace_map[b'%RG']  # if release_group is not in the db, put it there
+                logger.log("Episode has no release group, replacing it with '" + replace_map['%RG'] + "'", logger.DEBUG)
+                self._release_group = replace_map['%RG']  # if release_group is not in the db, put it there
 
         # if there's no release name then replace it with a reasonable facsimile
-        if not replace_map[b'%RN']:
+        if not replace_map['%RN']:
 
             if self.show.air_by_date or self.show.sports:
-                result_name = result_name.replace('%RN', '%S.N.%A.D.%E.N-' + replace_map[b'%RG'])
-                result_name = result_name.replace('%rn', '%s.n.%A.D.%e.n-' + replace_map[b'%RG'].lower())
+                result_name = result_name.replace('%RN', '%S.N.%A.D.%E.N-' + replace_map['%RG'])
+                result_name = result_name.replace('%rn', '%s.n.%A.D.%e.n-' + replace_map['%RG'].lower())
 
             elif anime_type != 3:
-                result_name = result_name.replace('%RN', '%S.N.%AB.%E.N-' + replace_map[b'%RG'])
-                result_name = result_name.replace('%rn', '%s.n.%ab.%e.n-' + replace_map[b'%RG'].lower())
+                result_name = result_name.replace('%RN', '%S.N.%AB.%E.N-' + replace_map['%RG'])
+                result_name = result_name.replace('%rn', '%s.n.%ab.%e.n-' + replace_map['%RG'].lower())
 
             else:
-                result_name = result_name.replace('%RN', '%S.N.S%0SE%0E.%E.N-' + replace_map[b'%RG'])
-                result_name = result_name.replace('%rn', '%s.n.s%0se%0e.%e.n-' + replace_map[b'%RG'].lower())
+                result_name = result_name.replace('%RN', '%S.N.S%0SE%0E.%E.N-' + replace_map['%RG'])
+                result_name = result_name.replace('%rn', '%s.n.s%0se%0e.%e.n-' + replace_map['%RG'].lower())
 
             # logger.log("Episode has no release name, replacing it with a generic one: " + result_name, logger.DEBUG)
 
-        if not replace_map[b'%RT']:
+        if not replace_map['%RT']:
             result_name = re.sub('([ _.-]*)%RT([ _.-]*)', r'\2', result_name)
 
         # split off ep name part only

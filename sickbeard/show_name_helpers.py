@@ -17,19 +17,16 @@
 # You should have received a copy of the GNU General Public License
 # along with SickChill. If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import print_function, unicode_literals
+#
 
 import fnmatch
 import os
 import re
 
-import six
-
 import sickbeard
 from sickbeard import common, logger
 from sickbeard.name_parser.parser import InvalidNameException, InvalidShowException, NameParser
 from sickbeard.scene_exceptions import get_scene_exceptions
-from sickchill.helper.encoding import ek
 
 resultFilters = {
     "sub(bed|ed|pack|s)",
@@ -52,16 +49,16 @@ def containsAtLeastOneWord(name, words):
 
     Returns: False if the name doesn't contain any word of words list, or the found word from the list.
     """
-    if isinstance(words, six.string_types):
+    if isinstance(words, str):
         words = words.split(',')
 
     words = {word.strip() for word in words if word.strip()}
     if not any(words):
         return True
 
-    for word, regexp in six.iteritems(
-        {word: re.compile(r'(^|[\W_]){0}($|[\W_])'.format(re.escape(word)), re.I) for word in words}
-    ):
+    for word, regexp in \
+            {word: re.compile(r'(^|[\W_]){0}($|[\W_])'.format(re.escape(word)), re.I)
+                for word in words}.items():
         if regexp.search(name):
             return word
     return False
@@ -179,20 +176,20 @@ def determineReleaseName(dir_name=None, nzb_name=None):
     for search in file_types:
 
         reg_expr = re.compile(fnmatch.translate(search), re.I)
-        files = [file_name for file_name in ek(os.listdir, dir_name) if
-                 ek(os.path.isfile, ek(os.path.join, dir_name, file_name))]
+        files = [file_name for file_name in os.listdir(dir_name) if
+                 os.path.isfile(os.path.join(dir_name, file_name))]
 
         results = [f for f in files if reg_expr.search(f)]
 
         if len(results) == 1:
-            found_file = ek(os.path.basename, results[0])
+            found_file = os.path.basename(results[0])
             found_file = found_file.rpartition('.')[0]
             if filter_bad_releases(found_file):
                 logger.log("Release name (" + found_file + ") found from file (" + results[0] + ")")
                 return found_file.rpartition('.')[0]
 
     # If that fails, we try the folder
-    folder = ek(os.path.basename, dir_name)
+    folder = os.path.basename(dir_name)
     if filter_bad_releases(folder):
         # NOTE: Multiple failed downloads will change the folder name.
         # (e.g., appending #s)
