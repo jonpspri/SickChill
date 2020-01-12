@@ -142,18 +142,18 @@ class MainSanityCheck(db.DBSanityCheck):
         for cur_duplicate in sql_results:
 
             logger.log("Duplicate show detected! " + column + ": " + str(cur_duplicate[column]) + " count: " + str(
-                cur_duplicate[b"count"]), logger.DEBUG)
+                cur_duplicate["count"]), logger.DEBUG)
 
             cur_dupe_results = self.connection.select(
                 "SELECT show_id, " + column + " FROM tv_shows WHERE " + column + " = ? LIMIT ?",
-                [cur_duplicate[column], int(cur_duplicate[b"count"]) - 1]
+                [cur_duplicate[column], int(cur_duplicate["count"]) - 1]
             )
 
             for cur_dupe_id in cur_dupe_results:
                 logger.log(
                     "Deleting duplicate show with " + column + ": " + str(cur_dupe_id[column]) + " show_id: " + str(
-                        cur_dupe_id[b"show_id"]))
-                self.connection.action("DELETE FROM tv_shows WHERE show_id = ?", [cur_dupe_id[b"show_id"]])
+                        cur_dupe_id["show_id"]))
+                self.connection.action("DELETE FROM tv_shows WHERE show_id = ?", [cur_dupe_id["show_id"]])
 
     def fix_duplicate_episodes(self):
 
@@ -163,19 +163,19 @@ class MainSanityCheck(db.DBSanityCheck):
         for cur_duplicate in sql_results:
 
             logger.log("Duplicate episode detected! showid: {dupe_id} season: {dupe_season} episode {dupe_episode} count: {dupe_count}".format
-                       (dupe_id=str(cur_duplicate[b"showid"]), dupe_season=str(cur_duplicate[b"season"]), dupe_episode=str(cur_duplicate[b"episode"]),
-                        dupe_count=str(cur_duplicate[b"count"])),
+                       (dupe_id=str(cur_duplicate["showid"]), dupe_season=str(cur_duplicate["season"]), dupe_episode=str(cur_duplicate["episode"]),
+                        dupe_count=str(cur_duplicate["count"])),
                        logger.DEBUG)
 
             cur_dupe_results = self.connection.select(
                 "SELECT episode_id FROM tv_episodes WHERE showid = ? AND season = ? and episode = ? ORDER BY episode_id DESC LIMIT ?",
-                [cur_duplicate[b"showid"], cur_duplicate[b"season"], cur_duplicate[b"episode"],
-                 int(cur_duplicate[b"count"]) - 1]
+                [cur_duplicate["showid"], cur_duplicate["season"], cur_duplicate["episode"],
+                 int(cur_duplicate["count"]) - 1]
             )
 
             for cur_dupe_id in cur_dupe_results:
-                logger.log("Deleting duplicate episode with episode_id: " + str(cur_dupe_id[b"episode_id"]))
-                self.connection.action("DELETE FROM tv_episodes WHERE episode_id = ?", [cur_dupe_id[b"episode_id"]])
+                logger.log("Deleting duplicate episode with episode_id: " + str(cur_dupe_id["episode_id"]))
+                self.connection.action("DELETE FROM tv_episodes WHERE episode_id = ?", [cur_dupe_id["episode_id"]])
 
     def fix_orphan_episodes(self):
 
@@ -183,10 +183,10 @@ class MainSanityCheck(db.DBSanityCheck):
             "SELECT episode_id, showid, tv_shows.indexer_id FROM tv_episodes LEFT JOIN tv_shows ON tv_episodes.showid=tv_shows.indexer_id WHERE tv_shows.indexer_id is NULL")
 
         for cur_orphan in sql_results:
-            logger.log("Orphan episode detected! episode_id: " + str(cur_orphan[b"episode_id"]) + " showid: " + str(
-                cur_orphan[b"showid"]), logger.DEBUG)
-            logger.log("Deleting orphan episode with episode_id: " + str(cur_orphan[b"episode_id"]))
-            self.connection.action("DELETE FROM tv_episodes WHERE episode_id = ?", [cur_orphan[b"episode_id"]])
+            logger.log("Orphan episode detected! episode_id: " + str(cur_orphan["episode_id"]) + " showid: " + str(
+                cur_orphan["showid"]), logger.DEBUG)
+            logger.log("Deleting orphan episode with episode_id: " + str(cur_orphan["episode_id"]))
+            self.connection.action("DELETE FROM tv_episodes WHERE episode_id = ?", [cur_orphan["episode_id"]])
 
     def fix_missing_table_indexes(self):
         if not self.connection.select("PRAGMA index_info('idx_indexer_id')"):
@@ -224,9 +224,9 @@ class MainSanityCheck(db.DBSanityCheck):
                 [curDate.toordinal(), common.SKIPPED, common.WANTED])
 
             for cur_unaired in sql_results:
-                logger.log("Fixing unaired episode status for episode_id: {0}".format(cur_unaired[b"episode_id"]))
+                logger.log("Fixing unaired episode status for episode_id: {0}".format(cur_unaired["episode_id"]))
                 self.connection.action("UPDATE tv_episodes SET status = ? WHERE episode_id = ?",
-                                       [common.UNAIRED, cur_unaired[b"episode_id"]])
+                                       [common.UNAIRED, cur_unaired["episode_id"]])
 
     def fix_tvrage_show_statues(self):
         status_map = {
@@ -252,11 +252,11 @@ class MainSanityCheck(db.DBSanityCheck):
         sql_results = self.connection.select("SELECT episode_id, showid FROM tv_episodes WHERE status IS NULL")
 
         for cur_ep in sql_results:
-            logger.log("MALFORMED episode status detected! episode_id: " + str(cur_ep[b"episode_id"]) + " showid: " + str(
-                cur_ep[b"showid"]), logger.DEBUG)
-            logger.log("Fixing malformed episode status with episode_id: " + str(cur_ep[b"episode_id"]))
+            logger.log("MALFORMED episode status detected! episode_id: " + str(cur_ep["episode_id"]) + " showid: " + str(
+                cur_ep["showid"]), logger.DEBUG)
+            logger.log("Fixing malformed episode status with episode_id: " + str(cur_ep["episode_id"]))
             self.connection.action("UPDATE tv_episodes SET status = ? WHERE episode_id = ?",
-                                   [common.UNKNOWN, cur_ep[b"episode_id"]])
+                                   [common.UNKNOWN, cur_ep["episode_id"]])
 
     def fix_invalid_airdates(self):
 
@@ -265,10 +265,10 @@ class MainSanityCheck(db.DBSanityCheck):
             [datetime.date.max.toordinal()])
 
         for bad_airdate in sql_results:
-            logger.log("Bad episode airdate detected! episode_id: " + str(bad_airdate[b"episode_id"]) + " showid: " + str(
-                bad_airdate[b"showid"]), logger.DEBUG)
-            logger.log("Fixing bad episode airdate for episode_id: " + str(bad_airdate[b"episode_id"]))
-            self.connection.action("UPDATE tv_episodes SET airdate = '1' WHERE episode_id = ?", [bad_airdate[b"episode_id"]])
+            logger.log("Bad episode airdate detected! episode_id: " + str(bad_airdate["episode_id"]) + " showid: " + str(
+                bad_airdate["showid"]), logger.DEBUG)
+            logger.log("Fixing bad episode airdate for episode_id: " + str(bad_airdate["episode_id"]))
+            self.connection.action("UPDATE tv_episodes SET airdate = '1' WHERE episode_id = ?", [bad_airdate["episode_id"]])
 
     def fix_subtitles_codes(self):
 
@@ -372,14 +372,14 @@ class AddSizeAndSceneNameFields(InitialSchema):
 
         logger.log("Adding file size to all episodes in DB, please be patient")
         for cur_ep in ep_results:
-            if not cur_ep[b"location"]:
+            if not cur_ep["location"]:
                 continue
 
             # if there is no size yet then populate it for us
-            if (not cur_ep[b"file_size"] or not int(cur_ep[b"file_size"])) and os.path.isfile(cur_ep[b"location"]):
-                cur_size = os.path.getsize(cur_ep[b"location"])
+            if (not cur_ep["file_size"] or not int(cur_ep["file_size"])) and os.path.isfile(cur_ep["location"]):
+                cur_size = os.path.getsize(cur_ep["location"])
                 self.connection.action("UPDATE tv_episodes SET file_size = ? WHERE episode_id = ?",
-                                       [cur_size, int(cur_ep[b"episode_id"])])
+                                       [cur_size, int(cur_ep["episode_id"])])
 
         # check each snatch to see if we can use it to get a release name from
         history_results = self.connection.select("SELECT * FROM history WHERE provider != -1 ORDER BY date ASC")
@@ -389,16 +389,16 @@ class AddSizeAndSceneNameFields(InitialSchema):
             # find the associated download, if there isn't one then ignore it
             download_results = self.connection.select(
                 "SELECT resource FROM history WHERE provider = -1 AND showid = ? AND season = ? AND episode = ? AND date > ?",
-                [cur_result[b"showid"], cur_result[b"season"], cur_result[b"episode"], cur_result[b"date"]])
+                [cur_result["showid"], cur_result["season"], cur_result["episode"], cur_result["date"]])
             if not download_results:
                 logger.log(
-                    "Found a snatch in the history for " + cur_result[b"resource"] + " but couldn't find the associated download, skipping it",
+                    "Found a snatch in the history for " + cur_result["resource"] + " but couldn't find the associated download, skipping it",
                     logger.DEBUG
                 )
                 continue
 
-            nzb_name = cur_result[b"resource"]
-            file_name = os.path.basename(download_results[0][b"resource"])
+            nzb_name = cur_result["resource"]
+            file_name = os.path.basename(download_results[0]["resource"])
 
             # take the extension off the filename, it's not needed
             if '.' in file_name:
@@ -407,7 +407,7 @@ class AddSizeAndSceneNameFields(InitialSchema):
             # find the associated episode on disk
             ep_results = self.connection.select(
                 "SELECT episode_id, status FROM tv_episodes WHERE showid = ? AND season = ? AND episode = ? AND location != ''",
-                [cur_result[b"showid"], cur_result[b"season"], cur_result[b"episode"]])
+                [cur_result["showid"], cur_result["season"], cur_result["episode"]])
             if not ep_results:
                 logger.log(
                     "The episode " + nzb_name + " was found in history but doesn't exist on disk anymore, skipping",
@@ -415,11 +415,11 @@ class AddSizeAndSceneNameFields(InitialSchema):
                 continue
 
             # get the status/quality of the existing ep and make sure it's what we expect
-            ep_status, ep_quality = common.Quality.splitCompositeStatus(int(ep_results[0][b"status"]))
+            ep_status, ep_quality = common.Quality.splitCompositeStatus(int(ep_results[0]["status"]))
             if ep_status != common.DOWNLOADED:
                 continue
 
-            if ep_quality != int(cur_result[b"quality"]):
+            if ep_quality != int(cur_result["quality"]):
                 continue
 
             # make sure this is actually a real release name and not a season pack or something
@@ -433,7 +433,7 @@ class AddSizeAndSceneNameFields(InitialSchema):
                 if parse_result.series_name and parse_result.season_number is not None and parse_result.episode_numbers and parse_result.release_group:
                     # if all is well by this point we'll just put the release name into the database
                     self.connection.action("UPDATE tv_episodes SET release_name = ? WHERE episode_id = ?",
-                                           [cur_name, ep_results[0][b"episode_id"]])
+                                           [cur_name, ep_results[0]["episode_id"]])
                     break
 
         # check each snatch to see if we can use it to get a release name from
@@ -442,7 +442,7 @@ class AddSizeAndSceneNameFields(InitialSchema):
         logger.log("Adding release name to all episodes with obvious scene filenames")
         for cur_result in empty_results:
 
-            ep_file_name = os.path.basename(cur_result[b"location"])
+            ep_file_name = os.path.basename(cur_result["location"])
             ep_file_name = os.path.splitext(ep_file_name)[0]
 
             # only want to find real scene names here so anything with a space in it is out
@@ -461,7 +461,7 @@ class AddSizeAndSceneNameFields(InitialSchema):
                 "Name " + ep_file_name + " gave release group of " + parse_result.release_group + ", seems valid",
                 logger.DEBUG)
             self.connection.action("UPDATE tv_episodes SET release_name = ? WHERE episode_id = ?",
-                                   [ep_file_name, cur_result[b"episode_id"]])
+                                   [ep_file_name, cur_result["episode_id"]])
 
         self.increment_db_version()
 
@@ -579,13 +579,13 @@ class Add1080pAndRawHDQualities(RenameSeasonFolders):
         cl = []
         shows = self.connection.select("SELECT * FROM tv_shows")
         for cur_show in shows:
-            if cur_show[b"quality"] == old_hd:
+            if cur_show["quality"] == old_hd:
                 new_quality = new_hd
-            elif cur_show[b"quality"] == old_any:
+            elif cur_show["quality"] == old_any:
                 new_quality = new_any
             else:
-                new_quality = self._update_composite_qualities(cur_show[b"quality"])
-            cl.append(["UPDATE tv_shows SET quality = ? WHERE show_id = ?", [new_quality, cur_show[b"show_id"]]])
+                new_quality = self._update_composite_qualities(cur_show["quality"])
+            cl.append(["UPDATE tv_shows SET quality = ? WHERE show_id = ?", [new_quality, cur_show["show_id"]]])
         self.connection.mass_action(cl)
 
         # update status that are are within the old hdwebdl (1<<3 which is 8) and better -- exclude unknown (1<<15 which is 32768)
@@ -594,7 +594,7 @@ class Add1080pAndRawHDQualities(RenameSeasonFolders):
         episodes = self.connection.select("SELECT * FROM tv_episodes WHERE status < 3276800 AND status >= 800")
         for cur_episode in episodes:
             cl.append(["UPDATE tv_episodes SET status = ? WHERE episode_id = ?",
-                       [self._update_status(cur_episode[b"status"]), cur_episode[b"episode_id"]]])
+                       [self._update_status(cur_episode["status"]), cur_episode["episode_id"]]])
         self.connection.mass_action(cl)
 
         # make two seperate passes through the history since snatched and downloaded (action & quality) may not always coordinate together
@@ -605,7 +605,7 @@ class Add1080pAndRawHDQualities(RenameSeasonFolders):
         historyAction = self.connection.select("SELECT * FROM history WHERE action < 3276800 AND action >= 800")
         for cur_entry in historyAction:
             cl.append(["UPDATE history SET action = ? WHERE showid = ? AND date = ?",
-                       [self._update_status(cur_entry[b"action"]), cur_entry[b"showid"], cur_entry[b"date"]]])
+                       [self._update_status(cur_entry["action"]), cur_entry["showid"], cur_entry["date"]]])
         self.connection.mass_action(cl)
 
         # update previous history so it shows the correct quality
@@ -614,7 +614,7 @@ class Add1080pAndRawHDQualities(RenameSeasonFolders):
         historyQuality = self.connection.select("SELECT * FROM history WHERE quality < 32768 AND quality >= 8")
         for cur_entry in historyQuality:
             cl.append(["UPDATE history SET quality = ? WHERE showid = ? AND date = ?",
-                       [self._update_quality(cur_entry[b"quality"]), cur_entry[b"showid"], cur_entry[b"date"]]])
+                       [self._update_quality(cur_entry["quality"]), cur_entry["showid"], cur_entry["date"]]])
         self.connection.mass_action(cl)
 
         self.increment_db_version()
@@ -942,8 +942,8 @@ class AddSportsOption(AddRequireAndIgnoreWords):
                 "SELECT * FROM tv_shows WHERE LOWER(classification) = 'sports' AND air_by_date = 1 AND sports = 0")
             for cur_entry in historyQuality:
                 cl.append(["UPDATE tv_shows SET sports = ? WHERE show_id = ?",
-                           [cur_entry[b"air_by_date"], cur_entry[b"show_id"]]])
-                cl.append(["UPDATE tv_shows SET air_by_date = 0 WHERE show_id = ?", [cur_entry[b"show_id"]]])
+                           [cur_entry["air_by_date"], cur_entry["show_id"]]])
+                cl.append(["UPDATE tv_shows SET air_by_date = 0 WHERE show_id = ?", [cur_entry["show_id"]]])
             self.connection.mass_action(cl)
 
         self.increment_db_version()

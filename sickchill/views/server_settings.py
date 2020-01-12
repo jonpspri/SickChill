@@ -18,16 +18,6 @@ from sickbeard.helpers import create_https_certificates, generateApiKey
 from sickchill.views import CalendarHandler, KeyHandler, LoginHandler, LogoutHandler
 from sickchill.views.api.webapi import ApiHandler
 
-# class Custom404Handler(RequestHandler):
-#     startTime = 0.
-#
-#     def prepare(self):
-#         return self.redirect(self.reverse_url('home', ''))
-#
-#         self.set_status(404)
-#         t = PageTemplate(rh=self, filename="404.mako")
-#         return self.finish(t.render(title='404', header=_('Oops')))
-
 
 class SRWebServer(threading.Thread):  # pylint: disable=too-many-instance-attributes
     def __init__(self, options=None):
@@ -185,4 +175,7 @@ class SRWebServer(threading.Thread):  # pylint: disable=too-many-instance-attrib
 
     def shutdown(self):
         self.alive = False
-        IOLoop.current().stop()
+        try:
+            IOLoop.current().stop()
+        except RuntimeError as e:
+            logger.log("Exception shutting down server - {0}".format(repr(e)))

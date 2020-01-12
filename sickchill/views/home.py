@@ -180,10 +180,10 @@ class Home(WebRoot):
         if not callback and jq_obj:
             return _("Error: Unsupported Request. Send jsonp request with 'callback' variable in the query string.")
 
-        self.set_header(b'Cache-Control', 'max-age=0,no-cache,no-store')
-        self.set_header(b'Content-Type', 'text/javascript')
-        self.set_header(b'Access-Control-Allow-Origin', '*')
-        self.set_header(b'Access-Control-Allow-Headers', 'x-requested-with')
+        self.set_header('Cache-Control', 'max-age=0,no-cache,no-store')
+        self.set_header('Content-Type', 'text/javascript')
+        self.set_header('Access-Control-Allow-Origin', '*')
+        self.set_header('Access-Control-Allow-Headers', 'x-requested-with')
 
         if sickbeard.started:
             return (callback or '') + '(' + json.dumps(
@@ -214,8 +214,6 @@ class Home(WebRoot):
 
     @staticmethod
     def testSABnzbd(host=None, username=None, password=None, apikey=None):
-        # self.set_header(b'Cache-Control', 'max-age=0,no-cache,no-store')
-
         host = config.clean_url(host)
         connection, accesMsg = sab.getSabAccesMethod(host)
         if connection:
@@ -271,7 +269,6 @@ class Home(WebRoot):
 
     @staticmethod
     def testGrowl(host=None, password=None):
-        # self.set_header(b'Cache-Control', 'max-age=0,no-cache,no-store')
 
         host = config.clean_host(host, default_port=23053)
         password = filters.unhide(sickbeard.GROWL_PASSWORD, password)
@@ -396,7 +393,7 @@ class Home(WebRoot):
         return finalResult
 
     def testPHT(self, host=None, username=None, password=None):
-        self.set_header(b'Cache-Control', 'max-age=0,no-cache,no-store')
+        self.set_header('Cache-Control', 'max-age=0,no-cache,no-store')
 
         password = filters.unhide(sickbeard.PLEX_CLIENT_PASSWORD, password)
 
@@ -414,7 +411,7 @@ class Home(WebRoot):
         return finalResult
 
     def testPMS(self, host=None, username=None, password=None, plex_server_token=None):
-        self.set_header(b'Cache-Control', 'max-age=0,no-cache,no-store')
+        self.set_header('Cache-Control', 'max-age=0,no-cache,no-store')
 
         password = filters.unhide(sickbeard.PLEX_SERVER_PASSWORD, password)
 
@@ -593,7 +590,6 @@ class Home(WebRoot):
 
     @staticmethod
     def getPushbulletDevices(api=None):
-        # self.set_header(b'Cache-Control', 'max-age=0,no-cache,no-store')
 
         result = notifiers.pushbullet_notifier.get_devices(api)
         if result:
@@ -1537,26 +1533,6 @@ class Home(WebRoot):
 
         return self.redirect("/home/displayShow?show=" + show)
 
-    # def searchEpisodeListManual(self, show=None, season=None, episode=None, search_mode='eponly'):
-    #     # retrieve the episode object and fail if we can't get one
-    #     self.set_header(b'Cache-Control', 'max-age=0,no-cache,no-store')
-    #     self.set_header(b'Content-Type', 'application/json')
-    #     ep_obj, error_msg = self._getEpisode(show, season, episode)
-    #     if error_msg or not ep_obj:
-    #         return json.dumps({'result': 'failure', 'errorMessage': error_msg})
-    #
-    #     return search.searchProvidersList(ep_obj.show, ep_obj, search_mode)
-    #
-    # def snatchEpisodeManual(self, result_dict):
-    #     self.set_header(b'Cache-Control', 'max-age=0,no-cache,no-store')
-    #     self.set_header(b'Content-Type', 'application/json')
-    #     result = sickbeard.classes.TorrentSearchResult.make_result(result_dict)
-    #     return search.snatchEpisode(result, SNATCHED_BEST)
-    #
-    # def testSearchEpisodeListManual(self, show=None, season=None, episode=None, search_mode='eponly'):
-    #     r = self.searchEpisodeListManual(show, season, episode, search_mode)
-    #     self.snatchEpisodeManual(r.get('results')[0])
-
     def searchEpisode(self, show=None, season=None, episode=None, downCurQuality=0):
 
         # retrieve the episode object and fail if we can't get one
@@ -1662,8 +1638,8 @@ class Home(WebRoot):
                 if not [i for i, j in zip(searchThread.segment, episodes) if i.indexerid == j['episodeindexid']]:
                     episodes += getEpisodes(searchThread, searchstatus)
 
-        self.set_header(b'Cache-Control', 'max-age=0,no-cache,no-store')
-        self.set_header(b'Content-Type', 'application/json')
+        self.set_header('Cache-Control', 'max-age=0,no-cache,no-store')
+        self.set_header('Content-Type', 'application/json')
         return json.dumps({'episodes': episodes})
 
     @staticmethod
