@@ -25,7 +25,6 @@ from os.path import isfile, join, normpath
 
 import sickbeard
 from sickchill.helper.common import try_int
-from sickchill.helper.encoding import ek
 from sickchill.helper.exceptions import MultipleShowObjectsException
 from sickchill.show.Show import Show
 
@@ -59,7 +58,7 @@ class GenericMedia(object):
 
         static_media_path = self.get_static_media_path()
 
-        if ek(isfile, static_media_path):
+        if isfile(static_media_path):
             with open(static_media_path, 'rb') as content:
                 return content.read()
 
@@ -79,7 +78,7 @@ class GenericMedia(object):
         :return: The root folder containing the media
         """
 
-        return ek(join, sickbeard.PROG_DIR, 'gui', sickbeard.GUI_NAME or 'slick')
+        return join(sickbeard.PROG_DIR, 'gui', sickbeard.GUI_NAME or 'slick')
 
     def get_media_type(self):
         """
@@ -88,7 +87,7 @@ class GenericMedia(object):
 
         static_media_path = self.get_static_media_path()
 
-        if ek(isfile, static_media_path):
+        if isfile(static_media_path):
             return guess_type(static_media_path)[0]
 
         return ''
@@ -111,9 +110,9 @@ class GenericMedia(object):
         if self.get_show():
             media_path = self.get_media_path()
 
-            if ek(isfile, media_path):
+            if isfile(media_path):
                 return normpath(media_path)
 
-        image_path = ek(join, self.get_media_root(), 'images', self.get_default_media_name())
+        image_path = join(self.get_media_root(), 'images', self.get_default_media_name())
 
         return image_path.replace('\\', '/')

@@ -29,7 +29,7 @@ import sickbeard
 from sickbeard import db, logger, show_name_helpers
 from sickbeard.name_parser.parser import InvalidNameException, InvalidShowException, NameParser
 from sickbeard.rssfeeds import getFeed
-from sickchill.helper.exceptions import AuthException, ex
+from sickchill.helper.exceptions import AuthException
 from sickchill.show.Show import Show
 
 
@@ -129,7 +129,7 @@ class TVCache(object):
                     cache_db_con.mass_action(cl)
 
         except AuthException as e:
-            logger.log("Authentication error: " + ex(e), logger.WARNING)
+            logger.log("Authentication error: " + repr(e), logger.WARNING)
         except Exception as e:
             logger.log("Error while searching " + self.provider.name + ", skipping: " + repr(e), logger.DEBUG)
 

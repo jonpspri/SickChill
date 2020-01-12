@@ -26,7 +26,6 @@ import twilio
 
 import sickbeard
 from sickbeard import common, logger
-from sickchill.helper.exceptions import ex
 
 
 class Notifier(object):
@@ -90,7 +89,7 @@ class Notifier(object):
                 from_=self.number.phone_number,
             )
         except twilio.TwilioRestException as e:
-            logger.log('Twilio notification failed:' + ex(e), logger.ERROR)
+            logger.log('Twilio notification failed:' + repr(e), logger.ERROR)
 
             if allow_raise:
                 raise e

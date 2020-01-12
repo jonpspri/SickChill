@@ -21,7 +21,6 @@
 
 from os.path import join
 
-from sickchill.helper.encoding import ek
 from sickchill.media.GenericMedia import GenericMedia
 
 
@@ -37,6 +36,6 @@ class ShowNetworkLogo(GenericMedia):
         show = self.get_show()
 
         if show:
-            return ek(join, self.get_media_root(), 'images', 'network', show.network_logo_name + '.png')
+            return join(self.get_media_root(), 'images', 'network', show.network_logo_name + '.png')
 
         return ''

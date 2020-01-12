@@ -31,13 +31,16 @@ import adba
 # import six
 
 import sickbeard
-from sickbeard import common, db, failed_history, helpers, history, logger, notifiers, show_name_helpers
+from sickbeard import common, db, failed_history, helpers, history, logger, \
+    notifiers, show_name_helpers
 from sickbeard.helpers import verify_freespace
-from sickbeard.name_parser.parser import InvalidNameException, InvalidShowException, NameParser
+from sickbeard.name_parser.parser import InvalidNameException, \
+    InvalidShowException, NameParser
 from sickchill.helper import glob
 from sickchill.helper.common import remove_extension, replace_extension, SUBTITLE_EXTENSIONS
 # from sickchill.helper.encoding import ek
-from sickchill.helper.exceptions import EpisodeNotFoundException, EpisodePostProcessingFailedException, ex, ShowDirectoryNotFoundException
+from sickchill.helper.exceptions import EpisodeNotFoundException, \
+    EpisodePostProcessingFailedException, ShowDirectoryNotFoundException
 from sickchill.show.Show import Show
 
 METHOD_COPY = "copy"
@@ -374,7 +377,7 @@ class PostProcessor(object):  # pylint: disable=too-many-instance-attributes
                 helpers.moveFile(cur_file_path, new_file_path)
                 helpers.chmodAsParent(new_file_path)
             except (IOError, OSError) as e:
-                self._log("Unable to move file " + cur_file_path + " to " + new_file_path + ": " + ex(e), logger.ERROR)
+                self._log("Unable to move file " + cur_file_path + " to " + new_file_path + ": " + repr(e), logger.ERROR)
                 raise
 
         self._combined_file_operation(file_path, new_path, new_base_name, associated_files, action=_int_move,
@@ -397,7 +400,7 @@ class PostProcessor(object):  # pylint: disable=too-many-instance-attributes
                 helpers.copyFile(cur_file_path, new_file_path)
                 helpers.chmodAsParent(new_file_path)
             except (IOError, OSError) as e:
-                self._log("Unable to copy file " + cur_file_path + " to " + new_file_path + ": " + ex(e), logger.ERROR)
+                self._log("Unable to copy file " + cur_file_path + " to " + new_file_path + ": " + repr(e), logger.ERROR)
                 raise
 
         self._combined_file_operation(file_path, new_path, new_base_name, associated_files, action=_int_copy,
@@ -420,7 +423,7 @@ class PostProcessor(object):  # pylint: disable=too-many-instance-attributes
                 helpers.hardlinkFile(cur_file_path, new_file_path)
                 helpers.chmodAsParent(new_file_path)
             except (IOError, OSError) as e:
-                self._log("Unable to link file " + cur_file_path + " to " + new_file_path + ": " + ex(e), logger.ERROR)
+                self._log("Unable to link file " + cur_file_path + " to " + new_file_path + ": " + repr(e), logger.ERROR)
                 raise
 
         self._combined_file_operation(file_path, new_path, new_base_name, associated_files, action=_int_hard_link, subtitles=subtitles)
@@ -442,7 +445,7 @@ class PostProcessor(object):  # pylint: disable=too-many-instance-attributes
                 helpers.moveAndSymlinkFile(cur_file_path, new_file_path)
                 helpers.chmodAsParent(new_file_path)
             except (IOError, OSError) as e:
-                self._log("Unable to link file " + cur_file_path + " to " + new_file_path + ": " + ex(e), logger.ERROR)
+                self._log("Unable to link file " + cur_file_path + " to " + new_file_path + ": " + repr(e), logger.ERROR)
                 raise
 
         self._combined_file_operation(file_path, new_path, new_base_name, associated_files,
@@ -465,7 +468,7 @@ class PostProcessor(object):  # pylint: disable=too-many-instance-attributes
                 helpers.symlink(cur_file_path, new_file_path)
                 helpers.chmodAsParent(cur_file_path)
             except (IOError, OSError) as e:
-                self._log("Unable to link file " + cur_file_path + " to " + new_file_path + ": " + ex(e), logger.ERROR)
+                self._log("Unable to link file " + cur_file_path + " to " + new_file_path + ": " + repr(e), logger.ERROR)
                 raise
 
         self._combined_file_operation(file_path, new_path, new_base_name, associated_files,
@@ -761,7 +764,7 @@ class PostProcessor(object):  # pylint: disable=too-many-instance-attributes
                 if not curEp:
                     raise EpisodeNotFoundException()
             except EpisodeNotFoundException as e:
-                self._log("Unable to create episode: " + ex(e), logger.DEBUG)
+                self._log("Unable to create episode: " + repr(e), logger.DEBUG)
                 raise EpisodePostProcessingFailedException()
 
             # associate all the episodes together under a single root episode
@@ -869,7 +872,7 @@ class PostProcessor(object):  # pylint: disable=too-many-instance-attributes
                 self._log("Script result: {0}".format(out), logger.DEBUG)
 
             except Exception as e:
-                self._log("Unable to run extra_script: {0}".format(ex(e)))
+                self._log("Unable to run extra_script: {0}".format(repr(e)))
 
     def _is_priority(self, ep_obj, new_ep_quality):  # pylint: disable=too-many-return-statements
         """

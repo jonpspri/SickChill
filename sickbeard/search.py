@@ -31,8 +31,7 @@ from sickbeard import clients, common, db, failed_history, helpers, history, log
 from sickbeard.common import MULTI_EP_RESULT, Quality, SEASON_RESULT, SNATCHED, SNATCHED_BEST, SNATCHED_PROPER
 from sickbeard.name_parser.parser import InvalidNameException, InvalidShowException, NameParser
 from sickchill.helper.common import try_int
-from sickchill.helper.encoding import ek
-from sickchill.helper.exceptions import AuthException, ex
+from sickchill.helper.exceptions import AuthException
 from sickchill.providers.GenericProvider import GenericProvider
 
 
@@ -56,7 +55,7 @@ def _downloadResult(result):
     elif result.resultType == GenericProvider.NZBDATA:
 
         # get the final file path to the nzb
-        file_name = ek(os.path.join, sickbeard.NZB_DIR, result.name + ".nzb")
+        file_name = os.path.join(sickbeard.NZB_DIR, result.name + ".nzb")
 
         logger.log("Saving NZB to " + file_name)
 
@@ -64,13 +63,13 @@ def _downloadResult(result):
 
         # save the data to disk
         try:
-            with ek(open, file_name, 'w') as fileOut:
+            with open(file_name, 'w') as fileOut:
                 fileOut.write(result.extraInfo[0])
 
             helpers.chmodAsParent(file_name)
 
         except EnvironmentError as e:
-            logger.log("Error trying to save NZB to black hole: " + ex(e), logger.ERROR)
+            logger.log("Error trying to save NZB to black hole: " + repr(e), logger.ERROR)
             newResult = False
     else:
         logger.log("Invalid provider type - this is a coding error, report it please", logger.ERROR)
@@ -386,10 +385,10 @@ def searchForNeededEpisodes():
         try:
             curFoundResults = curProvider.search_rss(episodes)
         except AuthException as e:
-            logger.log("Authentication error: " + ex(e), logger.WARNING)
+            logger.log("Authentication error: " + repr(e), logger.WARNING)
             continue
         except Exception as e:
-            logger.log("Error while searching " + curProvider.name + ", skipping: " + ex(e), logger.ERROR)
+            logger.log("Error while searching " + curProvider.name + ", skipping: " + repr(e), logger.ERROR)
             logger.log(traceback.format_exc(), logger.DEBUG)
             continue
 

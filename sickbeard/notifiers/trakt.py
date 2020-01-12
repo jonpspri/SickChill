@@ -25,7 +25,6 @@ from libtrakt.exceptions import traktAuthException, traktException, traktServerB
 
 import sickbeard
 from sickbeard import logger
-from sickchill.helper.exceptions import ex
 
 
 class Notifier(object):
@@ -92,7 +91,7 @@ class Notifier(object):
                 trakt_api.traktRequest("sync/collection", data, method='POST')
 
             except (traktException, traktAuthException, traktServerBusy) as e:
-                logger.log("Could not connect to Trakt service: {0}".format(ex(e)), logger.WARNING)
+                logger.log("Could not connect to Trakt service: {0}".format(repr(e)), logger.WARNING)
 
     def update_watchlist(self, show_obj=None, s=None, e=None, data_show=None, data_episode=None, update="add"):
 
@@ -170,7 +169,7 @@ class Notifier(object):
                 trakt_api.traktRequest(trakt_url, data, method='POST')
 
             except (traktException, traktAuthException, traktServerBusy) as e:
-                logger.log("Could not connect to Trakt service: {0}".format(ex(e)), logger.WARNING)
+                logger.log("Could not connect to Trakt service: {0}".format(repr(e)), logger.WARNING)
                 return False
 
         return True
@@ -237,5 +236,5 @@ class Notifier(object):
             else:
                 return "Test notice sent successfully to Trakt"
         except (traktException, traktAuthException, traktServerBusy) as e:
-            logger.log("Could not connect to Trakt service: {0}".format(ex(e)), logger.WARNING)
-            return "Test notice failed to Trakt: {0}".format(ex(e))
+            logger.log("Could not connect to Trakt service: {0}".format(repr(e)), logger.WARNING)
+            return "Test notice failed to Trakt: {0}".format(repr(e))

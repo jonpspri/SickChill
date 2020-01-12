@@ -32,7 +32,6 @@ from sickbeard import logger, tvcache
 from sickbeard.bs4_parser import BS4Parser
 from sickbeard.common import cpu_presets
 from sickchill.helper.common import convert_size, try_int
-from sickchill.helper.encoding import ek, ss
 from sickchill.providers.nzb.NZBProvider import NZBProvider
 
 
@@ -125,8 +124,8 @@ class NewznabProvider(NZBProvider):  # pylint: disable=too-many-instance-attribu
         Checks if we have an image for this provider already.
         Returns found image or the default newznab image
         """
-        if ek(os.path.isfile,
-              ek(os.path.join, sickbeard.PROG_DIR, 'gui', sickbeard.GUI_NAME, 'images', 'providers',
+        if os.path.isfile(
+              os.path.join(sickbeard.PROG_DIR, 'gui', sickbeard.GUI_NAME, 'images', 'providers',
                  self.get_id() + '.png')):
             return self.get_id() + '.png'
         return 'newznab.png'
@@ -232,7 +231,7 @@ class NewznabProvider(NZBProvider):  # pylint: disable=too-many-instance-attribu
         except (AttributeError, TypeError):
             return self._check_auth()
 
-        logger.log(ss(err_desc))
+        logger.log(err_desc)
 
         return False
 
@@ -344,7 +343,6 @@ class NewznabProvider(NZBProvider):  # pylint: disable=too-many-instance-attribu
                     #     self.torznab = False
 
                     for item in html('item'):
-                        try:
                             title = item.title.get_text(strip=True)
                             download_url = None
                             if item.link:
@@ -378,8 +376,6 @@ class NewznabProvider(NZBProvider):  # pylint: disable=too-many-instance-attribu
 
                             result = {'title': title, 'link': download_url, 'size': size, 'seeders': seeders, 'leechers': leechers}
                             items.append(result)
-                        except StandardError:
-                            continue
 
                 # Since we aren't using the search string,
                 # break out of the search string loop

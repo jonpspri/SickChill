@@ -402,7 +402,6 @@ class NameParser(object):
         return number
 
     def parse(self, name, cache_result=True, skip_scene_detection=False):
-        name = self._unicodify(name)
 
         if self.naming_pattern:
             cache_result = False

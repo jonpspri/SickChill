@@ -4,7 +4,6 @@
 from feedparser.api import parse
 
 from sickbeard import logger
-from sickchill.helper.exceptions import ex
 
 
 def getFeed(url, params=None, request_hook=None):
@@ -25,6 +24,6 @@ def getFeed(url, params=None, request_hook=None):
             logger.log('RSS error loading data: ' + url, logger.DEBUG)
 
     except Exception as e:
-        logger.log('RSS error: ' + ex(e), logger.DEBUG)
+        logger.log('RSS error: ' + repr(e), logger.DEBUG)
 
     return {'entries': []}

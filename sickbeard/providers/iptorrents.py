@@ -29,7 +29,6 @@ from requests.utils import dict_from_cookiejar
 from sickbeard import logger, tvcache
 from sickbeard.bs4_parser import BS4Parser
 from sickchill.helper.common import convert_size, try_int
-from sickchill.helper.exceptions import ex
 from sickchill.providers.torrent.TorrentProvider import TorrentProvider
 
 
@@ -179,7 +178,7 @@ class IPTorrentsProvider(TorrentProvider):  # pylint: disable=too-many-instance-
                             items.append(item)
 
                 except Exception as e:
-                    logger.log("Failed parsing provider. Error: {0!r}".format(ex(e)), logger.ERROR)
+                    logger.log("Failed parsing provider. Error: {0!r}".format(repr(e)), logger.ERROR)
 
             # For each search mode sort all the items by seeders if available
             items.sort(key=lambda d: try_int(d.get('seeders', 0)), reverse=True)

@@ -32,7 +32,7 @@ from sickbeard import db, helpers, logger
 from sickbeard.common import cpu_presets, DOWNLOADED, Quality, SNATCHED, SNATCHED_PROPER
 from sickbeard.name_parser.parser import InvalidNameException, InvalidShowException, NameParser
 from sickbeard.search import pickBestResult, snatchEpisode
-from sickchill.helper.exceptions import AuthException, ex
+from sickchill.helper.exceptions import AuthException
 from sickchill.show.History import History
 
 
@@ -88,10 +88,10 @@ class ProperFinder(object):  # pylint: disable=too-few-public-methods
             try:
                 curPropers = curProvider.find_propers(search_date)
             except AuthException as e:
-                logger.log("Authentication error: " + ex(e), logger.WARNING)
+                logger.log("Authentication error: " + repr(e), logger.WARNING)
                 continue
             except Exception as e:
-                logger.log("Exception while searching propers in " + curProvider.name + ", skipping: " + ex(e), logger.ERROR)
+                logger.log("Exception while searching propers in " + curProvider.name + ", skipping: " + repr(e), logger.ERROR)
                 logger.log(traceback.format_exc(), logger.DEBUG)
                 continue
 

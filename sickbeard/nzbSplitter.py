@@ -26,8 +26,6 @@ import re
 
 from sickbeard import classes, helpers, logger
 from sickbeard.name_parser.parser import InvalidNameException, InvalidShowException, NameParser
-from sickchill.helper.encoding import ek, ss
-from sickchill.helper.exceptions import ex
 
 try:
     import xml.etree.cElementTree as ETree
@@ -112,7 +110,7 @@ def create_nzb_string(file_elements, xmlns):
     for cur_file in file_elements:
         root_element.append(strip_xmlns(cur_file, xmlns))
 
-    return ETree.tostring(ss(root_element))
+    return ETree.tostring(root_element)
 
 
 def save_nzb(nzb_name, nzb_string):
@@ -123,11 +121,11 @@ def save_nzb(nzb_name, nzb_string):
     :param nzb_string: Content to write in file
     """
     try:
-        with ek(open, nzb_name + ".nzb", 'w') as nzb_fh:
+        with open(nzb_name + ".nzb", 'w') as nzb_fh:
             nzb_fh.write(nzb_string)
 
     except EnvironmentError as error:
-        logger.log("Unable to save NZB: " + ex(error), logger.ERROR)  # pylint: disable=no-member
+        logger.log("Unable to save NZB: " + repr(error), logger.ERROR)  # pylint: disable=no-member
 
 
 def strip_xmlns(element, xmlns):

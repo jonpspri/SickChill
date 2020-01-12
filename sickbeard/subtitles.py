@@ -28,7 +28,6 @@ import subprocess
 import threading
 import traceback
 
-import six
 import subliminal
 from babelfish import Language, language_converters
 from guessit import guessit
@@ -39,7 +38,6 @@ from sickbeard import db, history, logger
 from sickbeard.common import Quality
 from sickbeard.helpers import is_media_file
 from sickchill.helper.common import dateTimeFormat, episode_num
-from sickchill.helper.exceptions import ex
 from sickchill.show.Show import Show
 
 # https://github.com/Diaoul/subliminal/issues/536
@@ -172,7 +170,7 @@ def needs_subtitles(subtitles, force_lang=None):
     if not wanted_languages():
         return False
 
-    if isinstance(subtitles, six.string_types):
+    if isinstance(subtitles, str):
         subtitles = {subtitle.strip() for subtitle in subtitles.split(',') if subtitle.strip()}
 
     # if force language is set, we remove it from already downloaded subtitles
@@ -270,7 +268,7 @@ def download_subtitles(episode, force_lang=None):  # pylint: disable=too-many-lo
         subliminal.save_subtitles(video, found_subtitles, directory=subtitles_path,
                                   single=not sickbeard.SUBTITLES_MULTI, encoding='utf8')
     except IOError as error:
-        if 'No space left on device' in ex(error):
+        if 'No space left on device' in str(error):
             logger.log('Not enough space on the drive to save subtitles', logger.WARNING)
         else:
             logger.log(traceback.format_exc(), logger.WARNING)
@@ -498,7 +496,7 @@ class SubtitlesFinder(object):  # pylint: disable=too-few-public-methods
                 except Exception as error:
                     logger.log('Unable to find subtitles for {0} {1}. Error: {2}'.format
                                (ep_to_sub['show_name'], episode_num(ep_to_sub['season'], ep_to_sub['episode']) or
-                                episode_num(ep_to_sub['season'], ep_to_sub['episode'], numbering='absolute'), ex(error)), logger.ERROR)
+                                episode_num(ep_to_sub['season'], ep_to_sub['episode'], numbering='absolute'), repr(error)), logger.ERROR)
                     continue
 
                 if new_subtitles:
@@ -509,7 +507,7 @@ class SubtitlesFinder(object):  # pylint: disable=too-few-public-methods
             except Exception as error:
                 logger.log('Error while searching subtitles for {0} {1}. Error: {2}'.format
                            (ep_to_sub['show_name'], episode_num(ep_to_sub['season'], ep_to_sub['episode']) or
-                            episode_num(ep_to_sub['season'], ep_to_sub['episode'], numbering='absolute'), ex(error)), logger.ERROR)
+                            episode_num(ep_to_sub['season'], ep_to_sub['episode'], numbering='absolute'), repr(error)), logger.ERROR)
                 continue
 
         logger.log('Finished checking for missed subtitles', logger.INFO)
@@ -538,7 +536,7 @@ def run_subs_extra_scripts(episode, subtitle, video, single=False):
             logger.log('Script result: {0}'.format(stdout), logger.DEBUG)
 
         except Exception as error:
-            logger.log('Unable to run subs_extra_script: {0}'.format(ex(error)))
+            logger.log('Unable to run subs_extra_script: {0}'.format(repr(error)))
 
 
 def refine_video(video, episode):

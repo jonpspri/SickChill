@@ -25,16 +25,12 @@ import socket
 import time
 from datetime import datetime
 
-#import jsonrpclib
 import requests
-import six
 
-import sickbeard
 from sickbeard import classes, logger, scene_exceptions, tvcache
-from sickbeard.common import cpu_presets
 from sickbeard.helpers import sanitizeSceneName
 from sickchill.helper.common import episode_num
-from sickchill.helper.exceptions import AuthException, ex
+from sickchill.helper.exceptions import AuthException
 from sickchill.providers.torrent.TorrentProvider import TorrentProvider
 
 
@@ -122,7 +118,7 @@ class BTNProvider(TorrentProvider):
                     if 'torrents' in parsed_json:
                         found_torrents.update(parsed_json['torrents'])
 
-            for _, torrent_info in six.iteritems(found_torrents):
+            for torrent_info in found_torrents.values():
                 (title, url) = self._get_title_and_url(torrent_info)
 
                 if title and url:
@@ -136,22 +132,20 @@ class BTNProvider(TorrentProvider):
 
         # TO-DO:  Convert this to use requests_exception
 
-        server = jsonrpclib.Server(self.urls['base_url'])
+        #server = jsonrpclib.Server(self.urls['base_url'])
         parsed_json = {}
 
-        try:
-            parsed_json = server.getTorrents(apikey, params or {}, int(results_per_page), int(offset))
-            time.sleep(cpu_presets[sickbeard.CPU_PRESET])
+        payload = {
+            "method": "getTorrents",
+            "params": [ apikey, params or {}, int(results_per_page), int(offset) ],
+            "jsonrpc": "2.0",
+            "id": 0,
+        }
 
-        except jsonrpclib.jsonrpc.ProtocolError as error:
-            if error.message == (-32001, 'Invalid API Key'):
-                logger.log("The API key you provided was rejected because it is invalid. Check your provider configuration.", logger.WARNING)
-            elif error.message == (-32002, 'Call Limit Exceeded'):
-                logger.log("You have exceeded the limit of 150 calls per hour, per API key which is unique to your user account", logger.WARNING)
-            else:
-                logger.log("JSON-RPC protocol error while accessing provider. Error: {0} ".format(repr(error)), logger.ERROR)
-            parsed_json = {'api-error': ex(error)}
-            return parsed_json
+        try:
+        #     parsed_json = server.getTorrents(apikey, params or {}, int(results_per_page), int(offset))
+        #     time.sleep(cpu_presets[sickbeard.CPU_PRESET])
+            parsed_json = requests.post(self.urls['base_url'], json=payload).json()
 
         except socket.timeout:
             logger.log("Timeout while accessing provider", logger.WARNING)
@@ -165,6 +159,17 @@ class BTNProvider(TorrentProvider):
             if errorstring.startswith('<') and errorstring.endswith('>'):
                 errorstring = errorstring[1:-1]
             logger.log("Unknown error while accessing provider. Error: {0} ".format(errorstring), logger.WARNING)
+
+        assert parsed_json["jsonrpc"]
+
+        if parsed_json["error"]:
+            if parsed_json["error"]["code"] == -32001:
+                logger.log("The API key you provided was rejected because it is invalid. Check your provider configuration.", logger.WARNING)
+            elif parsed_json["error"]["code"] == -32002:
+                logger.log("You have exceeded the limit of 150 calls per hour, per API key which is unique to your user account", logger.WARNING)
+            else:
+                logger.log("JSON-RPC protocol error while accessing provider. Error: {0}: {1} ".format(parsed_json["error"]["code"], parsed_json["error"]["message"]), logger.ERROR)
+            parsed_json = {'api-error': "{0}: {1}".format(parsed_json["error"]["code"], parsed_json["error"]["message"]) }
 
         return parsed_json
 

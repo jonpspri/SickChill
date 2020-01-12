@@ -26,7 +26,6 @@ from requests_oauthlib import OAuth1Session
 
 import sickbeard
 from sickbeard import common, logger
-from sickchill.helper.exceptions import ex
 
 
 class Notifier(object):
@@ -102,7 +101,7 @@ class Notifier(object):
                                       resource_owner_secret=sickbeard.TWITTER_PASSWORD)
 
         try:
-            access_token = oauth_session.fetch_access_token(self.ACCESS_TOKEN_URL, verifier=unicode(key))
+            access_token = oauth_session.fetch_access_token(self.ACCESS_TOKEN_URL)
         except Exception as err:
             logger.log('The request for a token with did not succeed: {}'.format(err), logger.ERROR)
             return False
@@ -129,7 +128,7 @@ class Notifier(object):
         try:
             api.PostUpdate(message.encode('utf8')[:139])
         except Exception as e:
-            logger.log("Error Sending Tweet: {}".format(ex(e)), logger.ERROR)
+            logger.log("Error Sending Tweet: {}".format(repr(e)), logger.ERROR)
             return False
 
         return True
@@ -152,7 +151,7 @@ class Notifier(object):
         try:
             api.PostDirectMessage(message.encode('utf8')[:139], screen_name=dmdest)
         except Exception as e:
-            logger.log("Error Sending Tweet (DM): {}".format(ex(e)), logger.ERROR)
+            logger.log("Error Sending Tweet (DM): {}".format(repr(e)), logger.ERROR)
             return False
 
         return True

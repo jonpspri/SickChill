@@ -30,7 +30,6 @@ from sickbeard.classes import Proper, TorrentSearchResult
 from sickbeard.common import Quality
 from sickbeard.db import DBConnection
 from sickchill.helper.common import try_int
-from sickchill.helper.exceptions import ex
 from sickchill.providers.GenericProvider import GenericProvider
 from sickchill.show.Show import Show
 
@@ -144,7 +143,7 @@ class TorrentProvider(GenericProvider):
                 if mime_type == 'application/x-bittorrent':
                     return True
         except Exception as e:
-            logger.log('Failed to validate torrent file: {0}'.format(ex(e)), logger.DEBUG)
+            logger.log('Failed to validate torrent file: {0}'.format(repr(e)), logger.DEBUG)
 
         logger.log('Result is not a valid torrent file', logger.DEBUG)
         return False

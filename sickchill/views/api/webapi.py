@@ -28,7 +28,6 @@ import time
 import traceback
 from abc import abstractmethod
 
-import six
 from six.moves import urllib
 from tornado.web import RequestHandler
 
@@ -39,8 +38,7 @@ from sickbeard.common import (ARCHIVED, DOWNLOADED, FAILED, IGNORED, Overview, Q
 from sickbeard.postProcessor import PROCESS_METHODS
 from sickbeard.versionChecker import CheckVersion
 from sickchill.helper.common import dateFormat, dateTimeFormat, pretty_file_size, sanitize_filename, timeFormat, try_int
-from sickchill.helper.encoding import ek
-from sickchill.helper.exceptions import CantUpdateShowException, ex, ShowDirectoryNotFoundException
+from sickchill.helper.exceptions import CantUpdateShowException, ShowDirectoryNotFoundException
 from sickchill.helper.quality import get_quality_string
 from sickchill.media.ShowBanner import ShowBanner
 from sickchill.media.ShowFanArt import ShowFanArt
@@ -92,7 +90,7 @@ class ApiHandler(RequestHandler):
     def get(self, *args, **kwargs):
         kwargs = self.request.arguments
         # noinspection PyCompatibility
-        for arg, value in six.iteritems(kwargs):
+        for arg, value in kwargs.items():
             if len(value) == 1:
                 kwargs[arg] = value[0]
 
@@ -120,9 +118,9 @@ class ApiHandler(RequestHandler):
         try:
             out_dict = _call_dispatcher(args, kwargs)
         except Exception as e:  # real internal error oohhh nooo :(
-            logger.log("API :: " + ex(e), logger.ERROR)
+            logger.log("API :: " + repr(e), logger.ERROR)
             error_data = {
-                "error_msg": ex(e),
+                "error_msg": repr(e),
                 "args": args,
                 "kwargs": kwargs
             }
@@ -153,7 +151,7 @@ class ApiHandler(RequestHandler):
                 out = callback + '(' + out + ');'  # wrap with JSONP call if requested
         except Exception as e:  # if we fail to generate the output fake an error
             logger.log("API :: " + traceback.format_exc(), logger.DEBUG)
-            out = '{{"result": "{0}", "message": "error while composing output: {1}"}}'.format(result_type_map[RESULT_ERROR], ex(e))
+            out = '{{"result": "{0}", "message": "error while composing output: {1}"}}'.format(result_type_map[RESULT_ERROR], repr(e))
         return out
 
     def call_dispatcher(self, args, kwargs):  # pylint:disable=too-many-branches
@@ -198,7 +196,7 @@ class ApiHandler(RequestHandler):
                         else:
                             cur_out_dict = _responds(RESULT_ERROR, "No such cmd: '" + cmd + "'")
                     except ApiError as error:  # Api errors that we raised, they are harmless
-                        cur_out_dict = _responds(RESULT_ERROR, msg=ex(error))
+                        cur_out_dict = _responds(RESULT_ERROR, msg=repr(error))
                 else:  # if someone chained one of the forbidden commands they will get an error for this one cmd
                     cur_out_dict = _responds(RESULT_ERROR, msg="The cmd '" + cmd + "' is not supported while chaining")
 
@@ -618,7 +616,7 @@ def _get_root_dirs():
         valid = 1
         # noinspection PyBroadException
         try:
-            ek(os.listdir, root_dir)
+            os.listdir(root_dir)
         except Exception:
             valid = 0
         default = 0
@@ -699,7 +697,7 @@ class CMDComingEpisodes(ApiCall):
         data = {section: [] for section in grouped_coming_episodes.keys()}
 
         # noinspection PyCompatibility
-        for section, coming_episodes in six.iteritems(grouped_coming_episodes):
+        for section, coming_episodes in grouped_coming_episodes.items():
             for coming_episode in coming_episodes:
                 data[section].append({
                     'airdate': coming_episode[b'airdate'],
@@ -1027,7 +1025,7 @@ class CMDEpisodeSetStatus(ApiCall):
         extra_msg = ""
         if start_backlog:
             # noinspection PyCompatibility
-            for season, segment in six.iteritems(segments):
+            for season, segment in segments.items():
                 cur_backlog_queue_item = search_queue.BacklogQueueItem(show_obj, segment)
                 sickbeard.searchQueueScheduler.action.add_item(cur_backlog_queue_item)  # @UndefinedVariable
 
@@ -1170,8 +1168,8 @@ class CMDHistory(ApiCall):
             del row[b"action"]
 
             _rename_element(row, "show_id", "indexerid")
-            row[b"resource_path"] = ek(os.path.dirname, row[b"resource"])
-            row[b"resource"] = ek(os.path.basename, row[b"resource"])
+            row[b"resource_path"] = os.path.dirname(row[b"resource"])
+            row[b"resource"] = os.path.basename(row[b"resource"])
 
             # Add tvdbid for backward compatibility
             row[b'tvdbid'] = row[b'indexerid']
@@ -1298,7 +1296,7 @@ class CMDLogs(ApiCall):
         min_level = logger.LOGGING_LEVELS[str(self.min_level).upper()]
 
         data = []
-        if ek(os.path.isfile, logger.log_file):
+        if os.path.isfile(logger.log_file):
             with io.open(logger.log_file, 'r', encoding='utf-8') as f:
                 data = f.readlines()
 
@@ -1461,7 +1459,7 @@ class CMDSickBeardAddRootDir(ApiCall):
         index = 0
 
         # disallow adding/setting an invalid dir
-        if not ek(os.path.isdir, self.location):
+        if not os.path.isdir(self.location):
             return _responds(RESULT_FAILURE, msg="Location is invalid")
 
         root_dirs = []
@@ -1490,7 +1488,7 @@ class CMDSickBeardAddRootDir(ApiCall):
         root_dirs_new = [urllib.parse.unquote_plus(x) for x in root_dirs]
         root_dirs_new.insert(0, index)
         # noinspection PyCompatibility
-        root_dirs_new = '|'.join(six.text_type(x) for x in root_dirs_new)
+        root_dirs_new = '|'.join(root_dirs_new)
 
         sickbeard.ROOT_DIRS = root_dirs_new
         return _responds(RESULT_SUCCESS, _get_root_dirs(), msg="Root directories updated")
@@ -1589,7 +1587,7 @@ class CMDSickBeardDeleteRootDir(ApiCall):
         if len(root_dirs_new) > 0:
             root_dirs_new.insert(0, new_index)
         # noinspection PyCompatibility
-        root_dirs_new = "|".join(six.text_type(x) for x in root_dirs_new)
+        root_dirs_new = "|".join(root_dirs_new)
 
         sickbeard.ROOT_DIRS = root_dirs_new
         # what if the root dir was not found?
@@ -1786,7 +1784,7 @@ class CMDSickBeardSearchIndexers(ApiCall):
                 # noinspection PyCompatibility
                 results = [{
                                indexer_ids[_indexer]: int(my_show.data['id']),
-                               "name": six.text_type(my_show.data['seriesname']),
+                               "name": my_show.data['seriesname'],
                                "first_aired": my_show.data['firstaired'],
                                "indexer": int(_indexer)
                                }]
@@ -2068,7 +2066,7 @@ class CMDShowAddExisting(ApiCall):
         if show_obj:
             return _responds(RESULT_FAILURE, msg="An existing indexerid already exists in the database")
 
-        if not ek(os.path.isdir, self.location):
+        if not os.path.isdir(self.location):
             return _responds(RESULT_FAILURE, msg='Not a valid location')
 
         indexer_name = None
@@ -2176,7 +2174,7 @@ class CMDShowAddNew(ApiCall):
             else:
                 return _responds(RESULT_FAILURE, msg="Root directory is not set, please provide a location")
 
-        if not ek(os.path.isdir, self.location):
+        if not os.path.isdir(self.location):
             return _responds(RESULT_FAILURE, msg="'" + self.location + "' is not a valid location")
 
         # use default quality as a fail-safe
@@ -2246,7 +2244,7 @@ class CMDShowAddNew(ApiCall):
         indexer = indexer_result[b'data']['results'][0]['indexer']
 
         # moved the logic check to the end in an attempt to eliminate empty directory being created from previous errors
-        show_path = ek(os.path.join, self.location, sanitize_filename(indexer_name))
+        show_path = os.path.join(self.location, sanitize_filename(indexer_name))
 
         # don't create show dir if config says not to
         if sickbeard.ADD_SHOWS_WO_DIR:
@@ -2300,9 +2298,9 @@ class CMDShowCache(ApiCall):
         has_poster = 0
         has_banner = 0
 
-        if ek(os.path.isfile, cache_obj.poster_path(show_obj.indexerid)):
+        if os.path.isfile(cache_obj.poster_path(show_obj.indexerid)):
             has_poster = 1
-        if ek(os.path.isfile, cache_obj.banner_path(show_obj.indexerid)):
+        if os.path.isfile(cache_obj.banner_path(show_obj.indexerid)):
             has_banner = 1
 
         return _responds(RESULT_SUCCESS, {"poster": has_poster, "banner": has_banner})

@@ -26,7 +26,6 @@ from itertools import chain
 from os.path import join
 from random import shuffle
 
-import six
 from requests.utils import add_dict_to_cookiejar
 
 import sickbeard
@@ -39,7 +38,6 @@ from sickbeard.name_parser.parser import InvalidNameException, InvalidShowExcept
 from sickbeard.show_name_helpers import allPossibleShowNames
 from sickbeard.tvcache import TVCache
 from sickchill.helper.common import sanitize_filename
-from sickchill.helper.encoding import ek
 
 
 class GenericProvider(object):  # pylint: disable=too-many-instance-attributes
@@ -188,7 +186,7 @@ class GenericProvider(object):  # pylint: disable=too-many-instance-attributes
                         items[quality] = []
                     items[quality].append(item)
 
-            items_list = list(chain(*[v for (k_, v) in sorted(six.iteritems(items), reverse=True)]))
+            items_list = list(chain(*[v for (k_, v) in sorted(items.items(), reverse=True)]))
             items_list += unknown_items
 
         cl = []
@@ -346,7 +344,7 @@ class GenericProvider(object):  # pylint: disable=too-many-instance-attributes
         return results
 
     def get_id(self, suffix=''):
-        return GenericProvider.make_id(self.name) + six.text_type(suffix)
+        return GenericProvider.make_id(self.name) + suffix
 
     def get_quality(self, item, anime=False):
         (title, url_) = self._get_title_and_url(item)
@@ -548,7 +546,7 @@ class GenericProvider(object):  # pylint: disable=too-many-instance-attributes
 
             urls = [x.format(torrent_hash=torrent_hash, torrent_name=torrent_name) for x in self.bt_cache_urls]
 
-        filename = ek(join, self._get_storage_dir(), sanitize_filename(result.name) + '.' + self.provider_type)
+        filename = join(self._get_storage_dir(), sanitize_filename(result.name) + '.' + self.provider_type)
 
         return urls, filename
 

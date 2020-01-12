@@ -27,13 +27,7 @@ from .routes import Route
 from tornado.escape import xhtml_unescape
 
 from sickbeard.browser import foldersAtPath
-from sickchill.helper.encoding import ek
-
-try:
-    import json
-except ImportError:
-    # noinspection PyPackageRequirements,PyUnresolvedReferences
-    import simplejson as json
+import json
 
 
 @Route('/browser(/?.*)', name='filebrowser')
@@ -52,7 +46,7 @@ class WebFileBrowser(WebRoot):
 
         self.set_header(b'Cache-Control', 'max-age=0,no-cache,no-store')
         self.set_header(b'Content-Type', 'application/json')
-        paths = [entry['path'] for entry in foldersAtPath(ek(os.path.dirname, xhtml_unescape(term)), includeFiles=bool(int(includeFiles)),
+        paths = [entry['path'] for entry in foldersAtPath(os.path.dirname(xhtml_unescape(term)), includeFiles=bool(int(includeFiles)),
                                                           fileTypes=fileTypes.split(','))
                  if 'path' in entry]
 

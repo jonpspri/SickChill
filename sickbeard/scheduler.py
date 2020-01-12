@@ -26,7 +26,6 @@ import time
 import traceback
 
 from sickbeard import logger
-from sickchill.helper.exceptions import ex
 
 
 class Scheduler(threading.Thread):
@@ -115,5 +114,5 @@ class Scheduler(threading.Thread):
             # exiting thread
             self.stop.clear()
         except Exception as e:
-            logger.log("Exception generated in thread " + self.name + ": " + ex(e), logger.ERROR)
+            logger.log("Exception generated in thread " + self.name + ": " + repr(e), logger.ERROR)
             logger.log(repr(traceback.format_exc()), logger.DEBUG)

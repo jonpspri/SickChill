@@ -27,7 +27,6 @@ import time
 from operator import attrgetter
 
 import adba
-import six
 from .common import PageTemplate
 from github.GithubException import GithubException
 from .index import WebRoot
@@ -46,17 +45,12 @@ from sickbeard.scene_numbering import (get_scene_absolute_numbering, get_scene_a
 from sickbeard.versionChecker import CheckVersion
 from sickchill.helper import try_int
 from sickchill.helper.common import pretty_file_size
-from sickchill.helper.encoding import ek
-from sickchill.helper.exceptions import CantRefreshShowException, CantUpdateShowException, ex, NoNFOException, ShowDirectoryNotFoundException
+from sickchill.helper.exceptions import CantRefreshShowException, CantUpdateShowException, NoNFOException, ShowDirectoryNotFoundException
 from sickchill.show.Show import Show
 from sickchill.system.Restart import Restart
 from sickchill.system.Shutdown import Shutdown
 
-try:
-    import json
-except ImportError:
-    # noinspection PyPackageRequirements,PyUnresolvedReferences
-    import simplejson as json
+import json
 
 
 @Route('/home(/?.*)', name='home')
@@ -937,7 +931,7 @@ class Home(WebRoot):
             return _("No scene exceptions")
 
         out = []
-        for season, exceptions in iter(sorted(six.iteritems(exceptionsList))):
+        for season, exceptions in iter(sorted(exceptionsList.items())):
             if season == -1:
                 season = "*"
             out.append("S" + str(season) + ": " + ", ".join(exceptions.names))
@@ -1108,16 +1102,16 @@ class Home(WebRoot):
                 show_obj.rls_require_words = rls_require_words.strip()
                 show_obj.rls_prefer_words = rls_prefer_words.strip()
 
-            if not isinstance(location, six.text_type):
-                location = ek(six.text_type, location, 'utf-8')
+            if not isinstance(location, str):
+                location = location.decode('utf-8')
 
-            location = ek(os.path.normpath, xhtml_unescape(location))
+            location = os.path.normpath(xhtml_unescape(location))
             # noinspection PyProtectedMember
-            old_location = ek(os.path.normpath, show_obj._location)
+            old_location = os.path.normpath(show_obj._location)
             # if we change location clear the db of episodes, change it, write to db, and rescan
             if old_location != location:
                 logger.log(old_location + " != " + location, logger.DEBUG)
-                if not (ek(os.path.isdir, location) or sickbeard.CREATE_MISSING_SHOW_DIRS or sickbeard.ADD_SHOWS_WO_DIR):
+                if not (os.path.isdir(location) or sickbeard.CREATE_MISSING_SHOW_DIRS or sickbeard.ADD_SHOWS_WO_DIR):
                     errors.append(_("New location <tt>{location}</tt> does not exist").format(location=location))
                 else:
                     # change it
@@ -1235,7 +1229,7 @@ class Home(WebRoot):
         try:
             sickbeard.showQueueScheduler.action.update_show(show_obj, bool(force))
         except CantUpdateShowException as e:
-            ui.notifications.error(_("Unable to update this show."), ex(e))
+            ui.notifications.error(_("Unable to update this show."), repr(e))
 
         # just give it some time
         time.sleep(cpu_presets[sickbeard.CPU_PRESET])
@@ -1374,7 +1368,7 @@ class Home(WebRoot):
                         continue
 
                     if int(status) in Quality.DOWNLOADED and ep_obj.status not in Quality.SNATCHED + Quality.SNATCHED_PROPER + Quality.SNATCHED_BEST + \
-                        Quality.DOWNLOADED + [IGNORED] and not ek(os.path.isfile, ep_obj.location):
+                        Quality.DOWNLOADED + [IGNORED] and not os.path.isfile(ep_obj.location):
                         logger.log("Refusing to change status of " + cur_ep + " to DOWNLOADED because it's not SNATCHED/DOWNLOADED", logger.WARNING)
                         continue
 
@@ -1423,7 +1417,7 @@ class Home(WebRoot):
             msg = _("Backlog was automatically started for the following seasons of <b>{show_name}</b>").format(show_name=show_obj.name)
             msg += ':<br><ul>'
 
-            for season, segment in six.iteritems(segments):
+            for season, segment in segments.items():
                 cur_backlog_queue_item = search_queue.BacklogQueueItem(show_obj, segment)
                 sickbeard.searchQueueScheduler.action.add_item(cur_backlog_queue_item)
 
@@ -1442,7 +1436,7 @@ class Home(WebRoot):
             msg = _("Retrying Search was automatically started for the following season of <b>{show_name}</b>").format(show_name=show_obj.name)
             msg += ':<br><ul>'
 
-            for season, segment in six.iteritems(segments):
+            for season, segment in segments.items():
                 cur_failed_queue_item = search_queue.FailedQueueItem(show_obj, segment)
                 sickbeard.searchQueueScheduler.action.add_item(cur_failed_queue_item)
 

@@ -26,7 +26,6 @@ import traceback
 import sickbeard
 from sickbeard import common, config, generic_queue, logger, processTV
 from sickbeard.processTV import log_helper, process_dir
-from sickchill.helper.encoding import ek
 
 MANUAL_POST_PROCESS = 120
 AUTO_POST_PROCESS = 100
@@ -120,7 +119,7 @@ class ProcessingQueue(generic_queue.GenericQueue):
         #     return log_helper(u"{mode} post-processing attempted but directory doesn't exist: {directory}".format(
         #         **replacements), logger.WARNING)
 
-        if not ek(os.path.isabs, directory):
+        if not os.path.isabs(directory):
             return log_helper(
                 "{mode} post-processing attempted but directory is relative (and probably not what you really want to process): {directory}".format(
                     **replacements), logger.WARNING)

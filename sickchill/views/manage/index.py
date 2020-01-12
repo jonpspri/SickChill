@@ -22,13 +22,10 @@
 
 import os
 
-import six
-
 import sickbeard
 from sickbeard import db, logger, subtitles as subtitle_module, ui
 from sickbeard.common import Overview, Quality, SNATCHED
 from sickchill.helper import episode_num, try_int
-from sickchill.helper.encoding import ek
 from sickchill.helper.exceptions import CantRefreshShowException, CantUpdateShowException
 from sickchill.show.Show import Show
 from sickchill.views.common import PageTemplate
@@ -356,7 +353,7 @@ class Manage(Home, WebRoot):
         for curShow in showList:
 
             # noinspection PyProtectedMember
-            cur_root_dir = ek(os.path.dirname, curShow._location)
+            cur_root_dir = os.path.dirname(curShow._location)
             if cur_root_dir not in root_dir_list:
                 root_dir_list.append(cur_root_dir)
 
@@ -441,7 +438,7 @@ class Manage(Home, WebRoot):
                        **kwargs):
         dir_map = {}
         for cur_arg in filter(lambda x: x.startswith('orig_root_dir_'), kwargs):
-            dir_map[kwargs[cur_arg]] = ek(six.text_type, kwargs[cur_arg.replace('orig_root_dir_', 'new_root_dir_')], 'utf-8')
+            dir_map[kwargs[cur_arg]] = kwargs[cur_arg.replace('orig_root_dir_', 'new_root_dir_')]
 
         showIDs = toEdit.split("|")
         errors = []
@@ -452,11 +449,11 @@ class Manage(Home, WebRoot):
                 continue
 
             # noinspection PyProtectedMember
-            cur_root_dir = ek(os.path.dirname, show_obj._location)
+            cur_root_dir = os.path.dirname(show_obj._location)
             # noinspection PyProtectedMember
-            cur_show_dir = ek(os.path.basename, show_obj._location)
+            cur_show_dir = os.path.basename(show_obj._location)
             if cur_root_dir in dir_map and cur_root_dir != dir_map[cur_root_dir]:
-                new_show_dir = ek(os.path.join, dir_map[cur_root_dir], cur_show_dir)
+                new_show_dir = os.path.join(dir_map[cur_root_dir], cur_show_dir)
                 # noinspection PyProtectedMember
                 logger.log(
                     "For show " + show_obj.name + " changing dir from " + show_obj._location + " to " + new_show_dir)

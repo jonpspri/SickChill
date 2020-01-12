@@ -29,8 +29,6 @@ from requests.utils import add_dict_to_cookiejar
 
 import sickbeard
 from sickbeard import helpers, logger, tvcache
-from sickchill.helper.encoding import ek
-from sickchill.helper.exceptions import ex
 from sickchill.providers.torrent.TorrentProvider import TorrentProvider
 
 
@@ -84,7 +82,7 @@ class TorrentRssProvider(TorrentProvider):  # pylint: disable=too-many-instance-
         return [x for x in providers_set if x]
 
     def image_name(self):
-        if ek(os.path.isfile, ek(os.path.join, sickbeard.PROG_DIR, 'gui', sickbeard.GUI_NAME, 'images', 'providers', self.get_id() + '.png')):
+        if os.path.isfile(os.path.join(sickbeard.PROG_DIR, 'gui', sickbeard.GUI_NAME, 'images', 'providers', self.get_id() + '.png')):
             return self.get_id() + '.png'
         return 'torrentrss.png'
 
@@ -181,11 +179,11 @@ class TorrentRssProvider(TorrentProvider):  # pylint: disable=too-many-instance-
             return True, 'RSS feed Parsed correctly'
 
         except Exception as error:
-            return False, 'Error when trying to load RSS: {0}'.format(ex(error))
+            return False, 'Error when trying to load RSS: {0}'.format(repr(error))
 
     @staticmethod
     def dumpHTML(data):
-        dumpName = ek(os.path.join, sickbeard.CACHE_DIR, 'custom_torrent.html')
+        dumpName = os.path.join(sickbeard.CACHE_DIR, 'custom_torrent.html')
 
         try:
             fileOut = io.open(dumpName, 'wb')
@@ -193,7 +191,7 @@ class TorrentRssProvider(TorrentProvider):  # pylint: disable=too-many-instance-
             fileOut.close()
             helpers.chmodAsParent(dumpName)
         except IOError as error:
-            logger.log('Unable to save the file: {0}'.format(ex(error)), logger.ERROR)
+            logger.log('Unable to save the file: {0}'.format(repr(error)), logger.ERROR)
             return False
 
         logger.log('Saved custom_torrent html dump {0} '.format(dumpName), logger.INFO)

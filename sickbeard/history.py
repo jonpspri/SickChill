@@ -25,7 +25,6 @@ import datetime
 import db
 
 from sickbeard.common import FAILED, Quality, SNATCHED, SUBTITLED
-from sickchill.helper.encoding import ss
 from sickchill.show.History import History
 
 
@@ -43,8 +42,6 @@ def _logHistoryItem(action, showid, season, episode, quality, resource, provider
     :param version: tracked version of file (defaults to -1)
     """
     logDate = datetime.datetime.today().strftime(History.date_format)
-    resource = ss(resource)
-
     main_db_con = db.DBConnection()
     main_db_con.action(
         "INSERT INTO history (action, date, showid, season, episode, quality, resource, provider, version) VALUES (?,?,?,?,?,?,?,?,?)",

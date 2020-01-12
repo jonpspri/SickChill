@@ -28,7 +28,6 @@ import stat
 import threading
 import traceback
 
-import six
 from imdb import imdb
 from unidecode import unidecode
 
@@ -41,8 +40,7 @@ from sickbeard.indexers.indexer_config import INDEXER_TVRAGE
 from sickbeard.name_parser.parser import InvalidNameException, InvalidShowException, NameParser
 from sickchill.helper import glob
 from sickchill.helper.common import dateTimeFormat, episode_num, remove_extension, replace_extension, sanitize_filename, try_int
-from sickchill.helper.encoding import ek
-from sickchill.helper.exceptions import (EpisodeDeletedException, EpisodeNotFoundException, ex, MultipleEpisodesInDatabaseException,
+from sickchill.helper.exceptions import (EpisodeDeletedException, EpisodeNotFoundException, MultipleEpisodesInDatabaseException,
                                          MultipleShowObjectsException, MultipleShowsInDatabaseException, NoNFOException, ShowDirectoryNotFoundException,
                                          ShowNotFoundException)
 from sickchill.show.Show import Show
@@ -163,7 +161,7 @@ class TVShow(object):  # pylint: disable=too-many-instance-attributes, too-many-
 
     def _getLocation(self):
         # no dir check needed if missing show dirs are created during post-processing
-        if sickbeard.CREATE_MISSING_SHOW_DIRS or ek(os.path.isdir, self._location):
+        if sickbeard.CREATE_MISSING_SHOW_DIRS or os.path.isdir(self._location):
             return self._location
 
         raise ShowDirectoryNotFoundException("Show folder doesn't exist, you shouldn't be using it")
@@ -171,7 +169,7 @@ class TVShow(object):  # pylint: disable=too-many-instance-attributes, too-many-
     def _setLocation(self, newLocation):
         logger.log("Setter sets location to " + newLocation, logger.DEBUG)
         # Don't validate dir if user wants to add shows without creating a dir
-        if sickbeard.ADD_SHOWS_WO_DIR or ek(os.path.isdir, newLocation):
+        if sickbeard.ADD_SHOWS_WO_DIR or os.path.isdir(newLocation):
             dirty_setter("_location")(self, newLocation)
         else:
             raise NoNFOException("Invalid folder for the show!")
@@ -323,7 +321,7 @@ class TVShow(object):  # pylint: disable=too-many-instance-attributes, too-many-
 
         result = False
 
-        if not ek(os.path.isdir, self._location):
+        if not os.path.isdir(self._location):
             logger.log(str(self.indexerid) + ": Show dir doesn't exist, skipping NFO generation")
             return False
 
@@ -335,7 +333,7 @@ class TVShow(object):  # pylint: disable=too-many-instance-attributes, too-many-
 
     def writeMetadata(self, show_only=False):
 
-        if not ek(os.path.isdir, self._location):
+        if not os.path.isdir(self._location):
             logger.log(str(self.indexerid) + ": Show dir doesn't exist, skipping NFO generation")
             return
 
@@ -348,7 +346,7 @@ class TVShow(object):  # pylint: disable=too-many-instance-attributes, too-many-
 
     def writeEpisodeNFOs(self):
 
-        if not ek(os.path.isdir, self._location):
+        if not os.path.isdir(self._location):
             logger.log(str(self.indexerid) + ": Show dir doesn't exist, skipping NFO generation")
             return
 
@@ -369,13 +367,13 @@ class TVShow(object):  # pylint: disable=too-many-instance-attributes, too-many-
 
     def updateMetadata(self):
 
-        if not ek(os.path.isdir, self._location):
+        if not os.path.isdir(self._location):
             logger.log(str(self.indexerid) + ": Show dir doesn't exist, skipping NFO generation")
             return
 
         result = False
 
-        if not ek(os.path.isdir, self._location):
+        if not os.path.isdir(self._location):
             logger.log(str(self.indexerid) + ": Show dir doesn't exist, skipping NFO generation")
             return False
 
@@ -388,7 +386,7 @@ class TVShow(object):  # pylint: disable=too-many-instance-attributes, too-many-
     # find all media files in the show folder and create episodes for as many as possible
     def loadEpisodesFromDir(self):
 
-        if not ek(os.path.isdir, self._location):
+        if not os.path.isdir(self._location):
             logger.log(str(self.indexerid) + ": Show dir doesn't exist, not loading episodes from disk", logger.DEBUG)
             return
 
@@ -400,12 +398,12 @@ class TVShow(object):  # pylint: disable=too-many-instance-attributes, too-many-
         # create TVEpisodes from each media file (if possible)
         sql_l = []
         for media_file in media_files:
-            logger.log("{tvdbid}: Creating episode from {filename}".format(tvdbid=str(self.indexerid), filename=ek(os.path.basename, media_file)), logger.DEBUG)
+            logger.log("{tvdbid}: Creating episode from {filename}".format(tvdbid=str(self.indexerid), filename=os.path.basename(media_file)), logger.DEBUG)
             curEpisode = None
             try:
                 curEpisode = self.makeEpFromFile(media_file)
             except (ShowNotFoundException, EpisodeNotFoundException) as error:
-                logger.log("Episode {filename} returned an exception: {ex}".format(filename=ek(os.path.basename, media_file), ex=ex(error)), logger.ERROR)
+                logger.log("Episode {filename} returned an exception: {ex}".format(filename=os.path.basename(media_file), ex=repr(error)), logger.ERROR)
                 continue
             except EpisodeDeletedException:
                 logger.log("The episode deleted itself when I tried making an object for it", logger.DEBUG)
@@ -414,8 +412,8 @@ class TVShow(object):  # pylint: disable=too-many-instance-attributes, too-many-
                 continue
 
             # see if we should save the release name in the db
-            ep_file_name = ek(os.path.basename, curEpisode.location)
-            ep_file_name = ek(os.path.splitext, ep_file_name)[0]
+            ep_file_name = os.path.basename(curEpisode.location)
+            ep_file_name = os.path.splitext(ep_file_name)[0]
 
             try:
                 parse_result = NameParser(False, showObj=self, tryIndexers=True).parse(ep_file_name)
@@ -616,7 +614,7 @@ class TVShow(object):  # pylint: disable=too-many-instance-attributes, too-many-
     # make a TVEpisode object from a media file
     def makeEpFromFile(self, filepath):  # pylint: disable=too-many-locals, too-many-branches, too-many-statements
 
-        if not ek(os.path.isfile, filepath):
+        if not os.path.isfile(filepath):
             logger.log("{0}: That isn't even a real file dude... {1}".format
                        (self.indexerid, filepath))
             return None
@@ -662,7 +660,7 @@ class TVShow(object):  # pylint: disable=too-many-instance-attributes, too-many-
 
             else:
                 # if there is a new file associated with this ep then re-check the quality
-                if curEp.location and ek(os.path.normpath, curEp.location) != ek(os.path.normpath, filepath):
+                if curEp.location and os.path.normpath(curEp.location) != os.path.normpath(filepath):
                     logger.log(
                         "{0}: The old episode had a different file associated with it, re-checking the quality using the new filename {1}".format
                         (self.indexerid, filepath), logger.DEBUG)
@@ -924,7 +922,7 @@ class TVShow(object):  # pylint: disable=too-many-instance-attributes, too-many-
 
         for key in [x for x in imdb_info.keys() if x.replace('_', ' ') in imdbTv.keys()]:
             # Store only the first value for string type
-            if isinstance(imdb_info[key], six.string_types) and isinstance(imdbTv.get(key.replace('_', ' ')), list):
+            if isinstance(imdb_info[key], str) and isinstance(imdbTv.get(key.replace('_', ' ')), list):
                 imdb_info[key] = imdbTv.get(key.replace('_', ' '))[0]
             else:
                 imdb_info[key] = imdbTv.get(key.replace('_', ' '))
@@ -969,7 +967,7 @@ class TVShow(object):  # pylint: disable=too-many-instance-attributes, too-many-
 
         # Rename dict keys without spaces for DB upsert
         self.imdb_info = dict(
-            (k.replace(' ', '_'), k(v) if hasattr(v, 'keys') else v) for k, v in six.iteritems(imdb_info))
+            (k.replace(' ', '_'), k(v) if hasattr(v, 'keys') else v) for k, v in imdb_info.items())
         logger.log(str(self.indexerid) + ": Obtained info from IMDb ->" + str(self.imdb_info), logger.DEBUG)
 
     def nextEpisode(self):
@@ -1003,14 +1001,14 @@ class TVShow(object):  # pylint: disable=too-many-instance-attributes, too-many-
         sickbeard.showList = [x for x in sickbeard.showList if int(x.indexerid) != self.indexerid]
 
         # clear the cache
-        image_cache_dir = ek(os.path.join, sickbeard.CACHE_DIR, 'images')
-        for cache_file in ek(glob.glob, ek(os.path.join, glob.escape(image_cache_dir), str(self.indexerid) + '.*')):
+        image_cache_dir = os.path.join(sickbeard.CACHE_DIR, 'images')
+        for cache_file in glob.glob(os.path.join(glob.escape(image_cache_dir), str(self.indexerid) + '.*')):
             logger.log('Attempt to {0} cache file {1}'.format(action, cache_file))
             try:
                 if sickbeard.TRASH_REMOVE_SHOW:
                     send2trash(cache_file)
                 else:
-                    ek(os.remove, cache_file)
+                    os.remove(cache_file)
 
             except OSError as error:
                 logger.log('Unable to {0} {1}: {2}'.format(action, cache_file, error), logger.WARNING)
@@ -1020,12 +1018,12 @@ class TVShow(object):  # pylint: disable=too-many-instance-attributes, too-many-
             try:
                 logger.log('Attempt to {0} show folder {1}'.format(action, self._location))
                 # check first the read-only attribute
-                file_attribute = ek(os.stat, self.location)[0]
+                file_attribute = os.stat(self.location)[0]
                 if not file_attribute & stat.S_IWRITE:
                     # File is read-only, so make it writeable
                     logger.log('Attempting to make writeable the read only folder {0}'.format(self._location), logger.DEBUG)
                     try:
-                        ek(os.chmod, self.location, stat.S_IWRITE)
+                        os.chmod(self.location, stat.S_IWRITE)
                     except Exception as error:
                         logger.log('Unable to change permissions of {0}: {1}'.format(self._location, error), logger.WARNING)
 
@@ -1037,20 +1035,20 @@ class TVShow(object):  # pylint: disable=too-many-instance-attributes, too-many-
                     logger.log('Cannot delete the show folder from disk, because this location is the root dir for {num} other shows!'.format(num=num_shows_in_folder))
                     logger.log('Deleting individual episodes. There may be some related files or folders left behind afterwards.')
                     for ep_file in episodes_locations:
-                        for show_file in ek(glob.glob, helpers.replace_extension(glob.escape(ep_file[b'location']), '*')):
+                        for show_file in glob.glob(helpers.replace_extension(glob.escape(ep_file[b'location']), '*')):
                             logger.log('Attempt to {0} related file {1}'.format(action, show_file))
                             try:
                                 if sickbeard.TRASH_REMOVE_SHOW:
                                     send2trash(show_file)
                                 else:
-                                    ek(os.remove, show_file)
+                                    os.remove(show_file)
                             except OSError as error:
                                 logger.log('Unable to {0} {1}: {2}'.format(action, show_file, error), logger.WARNING)
                 else:
                     if sickbeard.TRASH_REMOVE_SHOW:
                         send2trash(self.location)
                     else:
-                        ek(shutil.rmtree, self.location)
+                        shutil.rmtree(self.location)
 
                     logger.log('{0} show folder {1}'.format
                                (('Deleted', 'Trashed')[sickbeard.TRASH_REMOVE_SHOW], self._location))
@@ -1073,7 +1071,7 @@ class TVShow(object):  # pylint: disable=too-many-instance-attributes, too-many-
     def refreshDir(self):
 
         # make sure the show dir is where we think it is unless dirs are created on the fly
-        if not ek(os.path.isdir, self._location) and not sickbeard.CREATE_MISSING_SHOW_DIRS:
+        if not os.path.isdir(self._location) and not sickbeard.CREATE_MISSING_SHOW_DIRS:
             return False
 
         # load from dir
@@ -1087,7 +1085,7 @@ class TVShow(object):  # pylint: disable=too-many-instance-attributes, too-many-
 
         sql_l = []
         for ep in sql_results:
-            curLoc = ek(os.path.normpath, ep[b"location"])
+            curLoc = os.path.normpath(ep[b"location"])
             season = int(ep[b"season"])
             episode = int(ep[b"episode"])
 
@@ -1101,8 +1099,8 @@ class TVShow(object):  # pylint: disable=too-many-instance-attributes, too-many-
                 continue
 
             # if the path doesn't exist or if it's not in our show dir
-            if not ek(os.path.isfile, curLoc) or not ek(os.path.normpath, curLoc).startswith(
-                    ek(os.path.normpath, self.location)):
+            if not os.path.isfile(curLoc) or not os.path.normpath(curLoc).startswith(
+                    os.path.normpath(self.location)):
 
                 # check if downloaded files still exist, update our data if this has changed
                 if not sickbeard.SKIP_REMOVED_FILES:
@@ -1135,7 +1133,7 @@ class TVShow(object):  # pylint: disable=too-many-instance-attributes, too-many-
             main_db_con.mass_action(sql_l)
 
     def download_subtitles(self, force=False):
-        if not ek(os.path.isdir, self._location):
+        if not os.path.isdir(self._location):
             logger.log(str(self.indexerid) + ": Show dir doesn't exist, can't download subtitles", logger.DEBUG)
             return
 
@@ -1418,8 +1416,8 @@ class TVEpisode(object):  # pylint: disable=too-many-instance-attributes, too-ma
         # self._location = newLocation
         dirty_setter("_location")(self, new_location)
 
-        if new_location and ek(os.path.isfile, new_location):
-            self.file_size = ek(os.path.getsize, new_location)
+        if new_location and os.path.isfile(new_location):
+            self.file_size = os.path.getsize(new_location)
         else:
             self.file_size = 0
 
@@ -1432,7 +1430,7 @@ class TVEpisode(object):  # pylint: disable=too-many-instance-attributes, too-ma
             self.saveToDB()
 
     def download_subtitles(self, force=False, force_lang=None):
-        if not ek(os.path.isfile, self.location):
+        if not os.path.isfile(self.location):
             logger.log("{id}: Episode file doesn't exist, can't download subtitles for {ep}".format
                        (id=self.show.indexerid, ep=episode_num(self.season, self.episode)),
                        logger.DEBUG)
@@ -1476,7 +1474,7 @@ class TVEpisode(object):  # pylint: disable=too-many-instance-attributes, too-ma
         cur_tbn = False
 
         # check for nfo and tbn
-        if ek(os.path.isfile, self.location):
+        if os.path.isfile(self.location):
             for cur_provider in sickbeard.metadata_provider_dict.values():
                 if cur_provider.episode_metadata:
                     new_result = cur_provider._has_episode_metadata(self)  # pylint: disable=protected-access
@@ -1502,7 +1500,7 @@ class TVEpisode(object):  # pylint: disable=too-many-instance-attributes, too-ma
 
         if not sql_results:
             # only load from NFO if we didn't load from DB
-            if ek(os.path.isfile, self.location):
+            if os.path.isfile(self.location):
                 try:
                     self.loadFromNFO(self.location)
                 except NoNFOException:
@@ -1556,7 +1554,7 @@ class TVEpisode(object):  # pylint: disable=too-many-instance-attributes, too-ma
 
             # don't overwrite my location
             if sql_results[0][b"location"] and not self._location:
-                self.location = ek(os.path.normpath, sql_results[0][b"location"])
+                self.location = os.path.normpath(sql_results[0][b"location"])
 
             if sql_results[0][b"file_size"]:
                 self.file_size = int(sql_results[0][b"file_size"])
@@ -1635,7 +1633,7 @@ class TVEpisode(object):  # pylint: disable=too-many-instance-attributes, too-ma
                 myEp = t[self.show.indexerid][season][episode]
 
         except (sickbeard.indexer_error, IOError) as error:
-            logger.log("" + sickbeard.indexerApi(self.indexer).name + " threw up an error: " + ex(error), logger.DEBUG)
+            logger.log("" + sickbeard.indexerApi(self.indexer).name + " threw up an error: " + repr(error), logger.DEBUG)
             # if the episode is already valid just log it, if not throw it up
             if self.name:
                 logger.log("" + sickbeard.indexerApi(self.indexer).name +
@@ -1713,7 +1711,7 @@ class TVEpisode(object):  # pylint: disable=too-many-instance-attributes, too-ma
             return False
 
         # don't update show status if show dir is missing, unless it's missing on purpose
-        if not ek(os.path.isdir, self.show._location) and not sickbeard.CREATE_MISSING_SHOW_DIRS and not sickbeard.ADD_SHOWS_WO_DIR:  # pylint: disable=protected-access
+        if not os.path.isdir(self.show._location) and not sickbeard.CREATE_MISSING_SHOW_DIRS and not sickbeard.ADD_SHOWS_WO_DIR:  # pylint: disable=protected-access
             logger.log("The show dir {0} is missing, not bothering to change the episode statuses since it'd probably be invalid".format(self.show._location))  # pylint: disable=protected-access
             return
 
@@ -1722,7 +1720,7 @@ class TVEpisode(object):  # pylint: disable=too-many-instance-attributes, too-ma
                        (id=self.show.indexerid, ep=episode_num(season, episode),
                         status=statusStrings[self.status], location=self.location), logger.DEBUG)
 
-        if not ek(os.path.isfile, self.location):
+        if not os.path.isfile(self.location):
             if self.airdate >= datetime.date.today() or self.airdate == datetime.date.fromordinal(1):
                 logger.log("{0}: Episode airs in the future or has no airdate, marking it {1}".format(self.show.indexerid, statusStrings[UNAIRED]), logger.DEBUG)
                 self.status = UNAIRED
@@ -1749,7 +1747,7 @@ class TVEpisode(object):  # pylint: disable=too-many-instance-attributes, too-ma
 
     def loadFromNFO(self, location):  # pylint: disable=too-many-branches
 
-        if not ek(os.path.isdir, self.show._location):  # pylint: disable=protected-access
+        if not os.path.isdir(self.show._location):  # pylint: disable=protected-access
             logger.log(
                 str(self.show.indexerid) + ": The show dir is missing, not bothering to try loading the episode NFO")
             return
@@ -1770,16 +1768,16 @@ class TVEpisode(object):  # pylint: disable=too-many-instance-attributes, too-ma
             nfoFile = replace_extension(self.location, "nfo")
             logger.log(str(self.show.indexerid) + ": Using NFO name " + nfoFile, logger.DEBUG)
 
-            if ek(os.path.isfile, nfoFile):
+            if os.path.isfile(nfoFile):
                 try:
                     showXML = etree.ElementTree(file=nfoFile)
                 except (SyntaxError, ValueError) as error:
-                    logger.log("Error loading the NFO, backing up the NFO and skipping for now: " + ex(error), logger.ERROR)
+                    logger.log("Error loading the NFO, backing up the NFO and skipping for now: " + repr(error), logger.ERROR)
                     try:
-                        ek(os.rename, nfoFile, nfoFile + ".old")
+                        os.rename(nfoFile, nfoFile + ".old")
                     except Exception as error:
                         logger.log(
-                            "Failed to rename your episode's NFO file - you need to delete it or fix it: " + ex(error), logger.ERROR)
+                            "Failed to rename your episode's NFO file - you need to delete it or fix it: " + repr(error), logger.ERROR)
                     raise NoNFOException("Error in NFO format")
 
                 for epDetails in showXML.getiterator('episodedetails'):
@@ -1826,7 +1824,7 @@ class TVEpisode(object):  # pylint: disable=too-many-instance-attributes, too-ma
             else:
                 self.hasnfo = False
 
-            if ek(os.path.isfile, replace_extension(nfoFile, "tbn")):
+            if os.path.isfile(replace_extension(nfoFile, "tbn")):
                 self.hastbn = True
             else:
                 self.hastbn = False
@@ -1848,7 +1846,7 @@ class TVEpisode(object):  # pylint: disable=too-many-instance-attributes, too-ma
 
     def createMetaFiles(self):
 
-        if not ek(os.path.isdir, self.show._location):  # pylint: disable=protected-access
+        if not os.path.isdir(self.show._location):  # pylint: disable=protected-access
             logger.log(str(self.show.indexerid) + ": The show dir is missing, not bothering to try to create metadata")
             return
 
@@ -1999,7 +1997,7 @@ class TVEpisode(object):  # pylint: disable=too-many-instance-attributes, too-ma
         if self.location is None or self.location == "":
             return None
         else:
-            return ek(os.path.join, self.show.location, self.location)
+            return os.path.join(self.show.location, self.location)
 
     def createStrings(self, pattern=None):
         patterns = [
@@ -2392,7 +2390,7 @@ class TVEpisode(object):  # pylint: disable=too-many-instance-attributes, too-ma
 
         # if not we append the folder on and use that
         else:
-            result = ek(os.path.join, self.formatted_dir(anime_type=anime_type), result)
+            result = os.path.join(self.formatted_dir(anime_type=anime_type), result)
 
         return result
 
@@ -2447,13 +2445,13 @@ class TVEpisode(object):  # pylint: disable=too-many-instance-attributes, too-ma
         in the naming settings.
         """
 
-        if not ek(os.path.isfile, self.location):
+        if not os.path.isfile(self.location):
             logger.log("Can't perform rename on " + self.location + " when it doesn't exist, skipping", logger.WARNING)
             return
 
         proper_path = self.proper_path()
-        absolute_proper_path = ek(os.path.join, self.show.location, proper_path)
-        absolute_current_path_no_ext, file_ext = ek(os.path.splitext, self.location)
+        absolute_proper_path = os.path.join(self.show.location, proper_path)
+        absolute_current_path_no_ext, file_ext = os.path.splitext(self.location)
         absolute_current_path_no_ext_length = len(absolute_current_path_no_ext)
 
         related_subs = []
@@ -2479,7 +2477,7 @@ class TVEpisode(object):  # pylint: disable=too-many-instance-attributes, too-ma
         # get related subs
         if self.show.subtitles and sickbeard.SUBTITLES_DIR:
             # assume that the video file is in the subtitles dir to find associated subs
-            subs_path = os.path.join(sickbeard.SUBTITLES_DIR, ek(os.path.basename, self.location))
+            subs_path = os.path.join(sickbeard.SUBTITLES_DIR, os.path.basename(self.location))
             related_subs = postProcessor.PostProcessor(self.location).list_associated_files(
                 subs_path, subtitles_only=True, subfolders=True, rename=True)
 
@@ -2492,11 +2490,11 @@ class TVEpisode(object):  # pylint: disable=too-many-instance-attributes, too-ma
             # move related files
             for cur_related_file in related_files:
                 # We need to fix something here because related files can be in subfolders and the original code doesn't handle this (at all)
-                cur_related_dir = ek(os.path.dirname, ek(os.path.abspath, cur_related_file))
-                subfolder = cur_related_dir.replace(ek(os.path.dirname, ek(os.path.abspath, self.location)), '')
+                cur_related_dir = os.path.dirname(os.path.abspath(cur_related_file))
+                subfolder = cur_related_dir.replace(os.path.dirname(os.path.abspath(self.location)), '')
                 # We now have a subfolder. We need to add that to the absolute_proper_path.
                 # First get the absolute proper-path dir
-                proper_related_dir = ek(os.path.dirname, ek(os.path.abspath, absolute_proper_path + file_ext))
+                proper_related_dir = os.path.dirname(os.path.abspath(absolute_proper_path + file_ext))
                 proper_related_path = absolute_proper_path.replace(proper_related_dir, proper_related_dir + subfolder)
 
                 cur_result = helpers.rename_ep_file(cur_related_file, proper_related_path,
@@ -2505,7 +2503,7 @@ class TVEpisode(object):  # pylint: disable=too-many-instance-attributes, too-ma
                     logger.log(str(self.indexerid) + ": Unable to rename file " + cur_related_file, logger.ERROR)
 
             for cur_related_sub in related_subs:
-                absolute_proper_subs_path = ek(os.path.join, sickbeard.SUBTITLES_DIR, self.formatted_filename())
+                absolute_proper_subs_path = os.path.join(sickbeard.SUBTITLES_DIR, self.formatted_filename())
                 cur_result = helpers.rename_ep_file(cur_related_sub, absolute_proper_subs_path,
                                                     absolute_current_path_no_ext_length)
                 if not cur_result:
@@ -2552,7 +2550,7 @@ class TVEpisode(object):  # pylint: disable=too-many-instance-attributes, too-ma
             if sickbeard.FILE_TIMESTAMP_TIMEZONE == 'local':
                 airdatetime = airdatetime.astimezone(network_timezones.sb_timezone)
 
-            filemtime = datetime.datetime.fromtimestamp(ek(os.path.getmtime, self.location)).replace(tzinfo=network_timezones.sb_timezone)
+            filemtime = datetime.datetime.fromtimestamp(os.path.getmtime(self.location)).replace(tzinfo=network_timezones.sb_timezone)
 
             if filemtime != airdatetime:
                 import time
@@ -2563,16 +2561,16 @@ class TVEpisode(object):  # pylint: disable=too-many-instance-attributes, too-ma
                 try:
                     if helpers.touchFile(self.location, time.mktime(airdatetime)):
                         logger.log("{0}: Changed modify date of '{1}' to show air date {2}".format
-                                   (self.show.indexerid, ek(os.path.basename, self.location), time.strftime("%b %d,%Y (%H:%M)", airdatetime)))
+                                   (self.show.indexerid, os.path.basename(self.location), time.strftime("%b %d,%Y (%H:%M)", airdatetime)))
                     else:
                         logger.log("{0}: Unable to modify date of '{1}' to show air date {2}".format
-                                   (self.show.indexerid, ek(os.path.basename, self.location), time.strftime("%b %d,%Y (%H:%M)", airdatetime)), logger.WARNING)
+                                   (self.show.indexerid, os.path.basename(self.location), time.strftime("%b %d,%Y (%H:%M)", airdatetime)), logger.WARNING)
                 except Exception:
                     logger.log("{0}: Failed to modify date of '{1}' to show air date {2}".format
-                               (self.show.indexerid, ek(os.path.basename, self.location), time.strftime("%b %d,%Y (%H:%M)", airdatetime)), logger.WARNING)
+                               (self.show.indexerid, os.path.basename(self.location), time.strftime("%b %d,%Y (%H:%M)", airdatetime)), logger.WARNING)
         except Exception:
             logger.log("{0}: Failed to modify date of '{1}'".format
-                       (self.show.indexerid, ek(os.path.basename, self.location)), logger.WARNING)
+                       (self.show.indexerid, os.path.basename(self.location)), logger.WARNING)
 
     def __getstate__(self):
         d = dict(self.__dict__)

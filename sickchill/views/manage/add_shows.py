@@ -24,7 +24,6 @@ import datetime
 import os
 import re
 
-import six
 from libtrakt import TraktAPI
 from requests.compat import unquote_plus
 from tornado.escape import xhtml_unescape
@@ -37,8 +36,6 @@ from sickbeard.helpers import get_showname_from_indexer
 from sickbeard.imdbPopular import imdb_popular
 from sickbeard.traktTrending import trakt_trending
 from sickchill.helper import sanitize_filename, try_int
-from sickchill.helper.encoding import ek
-from sickchill.helper.exceptions import ex
 from sickchill.show.Show import Show
 from sickchill.views.common import PageTemplate
 from sickchill.views.home import Home
@@ -114,7 +111,7 @@ class AddShows(Home):
                 # add search results
                 results.setdefault(indexer, []).extend(indexerResults)
 
-        for i, shows in six.iteritems(results):
+        for i, shows in results.items():
             final_results.extend({(sickbeard.indexerApi(i).name, i, sickbeard.indexerApi(i).config["show_url"], int(show['id']),
                                    show['seriesname'], show['firstaired'], show['in_show_list']) for show in shows})
 
@@ -150,15 +147,15 @@ class AddShows(Home):
         for root_dir in root_dirs:
             # noinspection PyBroadException
             try:
-                file_list = ek(os.listdir, root_dir)
+                file_list = os.listdir(root_dir)
             except Exception:
                 continue
 
             for cur_file in file_list:
                 # noinspection PyBroadException
                 try:
-                    cur_path = ek(os.path.normpath, ek(os.path.join, root_dir, cur_file))
-                    if not ek(os.path.isdir, cur_path):
+                    cur_path = os.path.normpath(os.path.join(root_dir, cur_file))
+                    if not os.path.isdir(cur_path):
                         continue
                     # ignore Synology folders
                     if cur_file.lower() in ['#recycle', '@eadir']:
@@ -168,9 +165,8 @@ class AddShows(Home):
 
                 cur_dir = {
                     'dir': cur_path,
-                    'display_dir': '<b>' + ek(os.path.dirname, cur_path) + os.sep + '</b>' + ek(
-                        os.path.basename,
-                        cur_path),
+                    'display_dir': '<b>' + os.path.dirname(cur_path) + os.sep + '</b>' +
+                        os.path.basename(cur_path),
                 }
 
                 # see if the folder is in KODI already
@@ -228,7 +224,7 @@ class AddShows(Home):
 
         elif not show_name:
             default_show_name = re.sub(r' \(\d{4}\)', '',
-                                       ek(os.path.basename, ek(os.path.normpath, show_dir)).replace('.', ' '))
+                                       os.path.basename(os.path.normpath(show_dir)).replace('.', ' '))
         else:
             default_show_name = show_name
 
@@ -324,7 +320,7 @@ class AddShows(Home):
         try:
             trending_shows, black_list = trakt_trending.fetch_trending_shows(traktList, page_url)
         except Exception as e:
-            logger.log("Could not get trending shows: {0}".format(ex(e)), logger.WARNING)
+            logger.log("Could not get trending shows: {0}".format(repr(e)), logger.WARNING)
 
         return t.render(black_list=black_list, trending_shows=trending_shows)
 
@@ -346,7 +342,7 @@ class AddShows(Home):
         try:
             popular_shows = imdb_popular.fetch_popular_shows()
         except Exception as e:
-            logger.log("Could not get popular shows: {0}".format(ex(e)), logger.WARNING)
+            logger.log("Could not get popular shows: {0}".format(repr(e)), logger.WARNING)
             popular_shows = None
 
         return t.render(title=_("Popular Shows"), header=_("Popular Shows"),
@@ -529,16 +525,16 @@ class AddShows(Home):
 
             indexer = int(providedIndexer)
             indexer_id = int(whichSeries)
-            show_name = ek(os.path.basename, ek(os.path.normpath, xhtml_unescape(fullShowPath)))
+            show_name = os.path.basename(os.path.normpath(xhtml_unescape(fullShowPath)))
 
         # use the whole path if it's given, or else append the show name to the root dir to get the full show path
         if fullShowPath:
-            show_dir = ek(os.path.normpath, xhtml_unescape(fullShowPath))
+            show_dir = os.path.normpath(xhtml_unescape(fullShowPath))
         else:
-            show_dir = ek(os.path.join, rootDir, sanitize_filename(xhtml_unescape(show_name)))
+            show_dir = os.path.join(rootDir, sanitize_filename(xhtml_unescape(show_name)))
 
         # blanket policy - if the dir exists you should have used "add existing show" numbnuts
-        if ek(os.path.isdir, show_dir) and not fullShowPath:
+        if os.path.isdir(show_dir) and not fullShowPath:
             ui.notifications.error(_("Unable to add show"), _("Folder {show_dir} exists already").format(show_dir=show_dir))
             return self.redirect('/addShows/existingShows/')
 

@@ -27,7 +27,6 @@ import sickbeard
 from sickbeard import common, logger, tv
 from sickbeard.common import DOWNLOADED, Quality
 from sickbeard.name_parser.parser import InvalidNameException, InvalidShowException, NameParser
-from sickchill.helper.encoding import ek
 
 name_presets = (
     '%SN - %Sx%0E',
@@ -196,7 +195,7 @@ def validate_name(pattern, multi=None, anime_type=None,  # pylint: disable=too-m
     new_name = ep.formatted_filename(pattern, multi, anime_type) + '.ext'
     new_path = ep.formatted_dir(pattern, multi, anime_type)
     if not file_only:
-        new_name = ek(os.path.join, new_path, new_name)
+        new_name = os.path.join(new_path, new_name)
 
     if not new_name:
         logger.log("Unable to create a name out of " + pattern, logger.DEBUG)

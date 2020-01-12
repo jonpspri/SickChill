@@ -23,7 +23,6 @@ import os
 import traceback
 from collections import namedtuple
 
-import six
 # noinspection PyProtectedMember
 from imdb import _exceptions as imdb_exceptions
 from libtrakt import TraktAPI
@@ -35,7 +34,6 @@ from sickbeard.common import WANTED
 from sickbeard.helpers import chmodAsParent, get_showname_from_indexer, makeDir, sortable_name
 from sickbeard.tv import TVShow
 from sickchill.helper.common import sanitize_filename
-from sickchill.helper.encoding import ek
 from sickchill.helper.exceptions import (CantRefreshShowException, CantRemoveShowException, CantUpdateShowException, EpisodeDeletedException,
                                          MultipleShowObjectsException, ShowDirectoryNotFoundException)
 from sickchill.show.Show import Show
@@ -305,7 +303,7 @@ class QueueItemAdd(ShowQueueItem):  # pylint: disable=too-many-instance-attribut
 
         if self.showDir:
             try:
-                assert isinstance(self.showDir, six.text_type)
+                assert isinstance(self.showDir, str)
             except AssertionError:
                 logger.log(traceback.format_exc(), logger.WARNING)
                 self._finish_early()
@@ -332,7 +330,7 @@ class QueueItemAdd(ShowQueueItem):  # pylint: disable=too-many-instance-attribut
                     self._finish_early()
                     return
 
-                self.showDir = ek(os.path.join, self.root_dir, sanitize_filename(show_name))
+                self.showDir = os.path.join(self.root_dir, sanitize_filename(show_name))
 
                 dir_exists = makeDir(self.showDir)
                 if not dir_exists:
@@ -402,7 +400,7 @@ class QueueItemAdd(ShowQueueItem):  # pylint: disable=too-many-instance-attribut
                 # If we have the show in our list, but the location is wrong, lets fix it and refresh!
                 existing_show = Show.find(sickbeard.showList, self.indexer_id)
                 # noinspection PyProtectedMember
-                if existing_show and not ek(os.path.isdir, existing_show._location):  # pylint: disable=protected-access
+                if existing_show and not os.path.isdir(existing_show._location):  # pylint: disable=protected-access
                     newShow = existing_show
                 else:
                     raise error
@@ -751,25 +749,25 @@ class QueueItemRemove(ShowQueueItem):
         # If any notification fails, don't stop postProcessor
         try:
             # send notifications
-            notifiers.notify_download(ep_obj._format_pattern('%SN - %Sx%0E - %EN - %QN'))  # pylint: disable=protected-access
+            notifiers.notify_download(self._format_pattern('%SN - %Sx%0E - %EN - %QN'))  # pylint: disable=protected-access
 
             # do the library update for KODI
-            notifiers.kodi_notifier.update_library(ep_obj.show.name)
+            notifiers.kodi_notifier.update_library(self.show.name)
 
             # do the library update for Plex
-            notifiers.plex_notifier.update_library(ep_obj)
+            notifiers.plex_notifier.update_library(self)
 
             # do the library update for EMBY
-            notifiers.emby_notifier.update_library(ep_obj.show)
+            notifiers.emby_notifier.update_library(self.show)
 
             # do the library update for NMJ
             # nmj_notifier kicks off its library update when the notify_download is issued (inside notifiers)
 
             # do the library update for Synology Indexer
-            notifiers.synoindex_notifier.addFile(ep_obj.location)
+            notifiers.synoindex_notifier.addFile(self.location)
 
             # do the library update for pyTivo
-            notifiers.pytivo_notifier.update_library(ep_obj)
+            notifiers.pytivo_notifier.update_library(self)
         except Exception:
             logger.log("Some notifications could not be sent. Continuing with postProcessing...")
 

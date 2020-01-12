@@ -23,7 +23,6 @@
 
 #
 
-import datetime
 import json
 import threading
 import time
@@ -31,7 +30,7 @@ import time
 import sickbeard
 from sickbeard import db, helpers, logger, network_timezones, ui
 from sickbeard.indexers.indexer_config import INDEXER_TVDB, INDEXER_TVRAGE
-from sickchill.helper.exceptions import CantRefreshShowException, CantUpdateShowException, ex
+from sickchill.helper.exceptions import CantRefreshShowException, CantUpdateShowException
 
 
 class ShowUpdater(object):  # pylint: disable=too-few-public-methods
@@ -72,7 +71,7 @@ class ShowUpdater(object):  # pylint: disable=too-few-public-methods
         if not self._gettoken():
             self.amActive = False
             logger.log('No token from tvdb so update not possible')
-            return 
+            return
 
         cache_db_con = db.DBConnection('cache.db')
         result = cache_db_con.select('SELECT `time` FROM lastUpdate WHERE provider = ?', ['theTVDB'])
@@ -84,7 +83,7 @@ class ShowUpdater(object):  # pylint: disable=too-few-public-methods
             logger.log( 'Last update: %s' %time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(last_update)))
                 # We query tvdb for updates starting from the last update time from the cache until now with increments of 7 days
             for fromTime in range(last_update, update_timestamp, 604800): # increments of 604800 sec = 7*24*60*60
-                try:                    
+                try:
                     resp = self.session.get(self.update + str(fromTime), timeout=self.timeout)
                     if resp.ok:
                         TvdbData = json.loads(resp.text)
@@ -109,7 +108,7 @@ class ShowUpdater(object):  # pylint: disable=too-few-public-methods
                     else:
                         pi_list.append(sickbeard.showQueueScheduler.action.refresh_show(cur_show, False))
             except (CantUpdateShowException, CantRefreshShowException) as error:
-                logger.log('Automatic update failed: {0}'.format(ex(error)))
+                logger.log('Automatic update failed: {0}'.format(repr(error)))
 
         ui.ProgressIndicators.setIndicator('dailyUpdate', ui.QueueProgressIndicator('Daily Update', pi_list))
 

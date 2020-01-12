@@ -27,8 +27,7 @@ from six.moves import urllib
 
 from sickbeard import db, logger
 from sickbeard.common import FAILED, Quality, WANTED
-from sickchill.helper.encoding import ss
-from sickchill.helper.exceptions import EpisodeNotFoundException, ex
+from sickchill.helper.exceptions import EpisodeNotFoundException
 from sickchill.show.History import History
 
 
@@ -40,8 +39,6 @@ def prepareFailedName(release):
         fixed = fixed.rpartition(".")[0]
 
     fixed = re.sub(r"[\.\-\+\ ]", "_", fixed)
-    fixed = ss(fixed)
-
     return fixed
 
 
@@ -140,7 +137,7 @@ def revertEpisode(epObj):
                 epObj.saveToDB()
 
     except EpisodeNotFoundException as e:
-        logger.log("Unable to create episode, please set its status manually: " + ex(e),
+        logger.log("Unable to create episode, please set its status manually: " + repr(e),
                    logger.WARNING)
 
 
@@ -160,7 +157,7 @@ def markFailed(epObj):
             epObj.saveToDB()
 
     except EpisodeNotFoundException as e:
-        logger.log("Unable to get episode, please set its status manually: " + ex(e), logger.WARNING)
+        logger.log("Unable to get episode, please set its status manually: " + repr(e), logger.WARNING)
 
     return log_str
 
