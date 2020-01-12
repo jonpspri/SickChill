@@ -328,13 +328,13 @@ def searchIndexerForShowID(regShowName, indexer=None, indexer_id=None, ui=None):
 
             # noinspection PyBroadException
             try:
-                seriesname = search[0][b'seriesname']
+                seriesname = search[0]['seriesname']
             except Exception:
                 seriesname = None
 
             # noinspection PyBroadException
             try:
-                series_id = search[0][b'id']
+                series_id = search[0]['id']
             except Exception:
                 series_id = None
 
@@ -758,7 +758,7 @@ def get_absolute_number_from_season_and_episode(show, season, episode):
         sql_results = main_db_con.select(sql, [show.indexerid, season, episode])
 
         if len(sql_results) == 1:
-            absolute_number = int(sql_results[0][b"absolute_number"])
+            absolute_number = int(sql_results[0]["absolute_number"])
             logger.log(_("Found absolute number {absolute} for show {show} {ep}").format
                        (absolute=absolute_number, show=show.name,
                         ep=episode_num(season, episode)), logger.DEBUG)
@@ -1316,7 +1316,7 @@ def mapIndexersToShow(showObj):
         # Check if its mapped with both tvdb and tvrage.
         if len(nlist) >= 4:
             logger.log(_("Found indexer mapping in cache for show: ") + showObj.name, logger.DEBUG)
-            mapped[int(curResult[b'mindexer'])] = int(curResult[b'mindexer_id'])
+            mapped[int(curResult['mindexer'])] = int(curResult['mindexer_id'])
             break
     else:
         sql_l = []
@@ -1341,13 +1341,13 @@ def mapIndexersToShow(showObj):
                 logger.log(_("Mapping {} -> {} for show: {}").format(
                     sickbeard.indexerApi(showObj.indexer).name, sickbeard.indexerApi(indexer).name, showObj.name), logger.DEBUG)
 
-                mapped[indexer] = int(mapped_show[0][b'id'])
+                mapped[indexer] = int(mapped_show[0]['id'])
 
                 logger.log(_("Adding indexer mapping to DB for show: {}").format(showObj.name), logger.DEBUG)
 
                 sql_l.append([
                     "INSERT OR IGNORE INTO indexer_mapping (indexer_id, indexer, mindexer_id, mindexer) VALUES (?,?,?,?)",
-                    [showObj.indexerid, showObj.indexer, int(mapped_show[0][b'id']), indexer]])
+                    [showObj.indexerid, showObj.indexer, int(mapped_show[0]['id']), indexer]])
 
         if sql_l:
             main_db_con = db.DBConnection()
@@ -1824,7 +1824,7 @@ def tvdbid_from_remote_id(indexer_id, indexer):  # pylint:disable=too-many-retur
         data = getURL(url, session=session, returns='json')
         if data is None:
             return tvdb_id
-        tvdb_id = data[b'externals'][b'thetvdb']
+        tvdb_id = data['externals']['thetvdb']
         return tvdb_id
     else:
         return tvdb_id

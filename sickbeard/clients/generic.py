@@ -221,7 +221,7 @@ class GenericClient(object):  # pylint: disable=too-many-instance-attributes
                 raise
 
             try:
-                info = torrent_bdecode[b'info']
+                info = torrent_bdecode['info']
             except Exception:
                 logger.log('Unable to find info field in torrent', logger.ERROR)
                 logger.log('Torrent bencoded data: {0!r}'.format(result.content), logger.INFO)

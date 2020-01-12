@@ -355,7 +355,7 @@ class QueueItemAdd(ShowQueueItem):  # pylint: disable=too-many-instance-attribut
             # if the show has no episodes/seasons
             if not s:
                 error_string = 'Show {0} is on {1} but contains no season/episode data.'.format(
-                    s[b'seriesname'], sickbeard.indexerApi(self.indexer).name)
+                    s['seriesname'], sickbeard.indexerApi(self.indexer).name)
 
                 logger.log(error_string)
                 ui.notifications.error('Unable to add show', error_string)
@@ -371,7 +371,7 @@ class QueueItemAdd(ShowQueueItem):  # pylint: disable=too-many-instance-attribut
                 'Unable to add show', error_string)
 
             if sickbeard.USE_TRAKT:
-                trakt_id = sickbeard.indexerApi(self.indexer).config[b'trakt_id']
+                trakt_id = sickbeard.indexerApi(self.indexer).config['trakt_id']
                 trakt_api = TraktAPI(sickbeard.SSL_VERIFY, sickbeard.TRAKT_TIMEOUT)
 
                 title = self.showDir.split('/')[-1]

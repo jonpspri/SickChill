@@ -329,7 +329,7 @@ def wantedEpisodes(show, fromDate):
 
     # check through the list of statuses to see if we want any
     for result in sql_results:
-        cur_status, cur_quality = common.Quality.splitCompositeStatus(int(result[b"status"] or -1))
+        cur_status, cur_quality = common.Quality.splitCompositeStatus(int(result["status"] or -1))
         if cur_status not in {common.WANTED, common.DOWNLOADED, common.SNATCHED, common.SNATCHED_PROPER}:
             continue
 
@@ -340,7 +340,7 @@ def wantedEpisodes(show, fromDate):
             elif cur_quality in allowed_qualities:
                 continue
 
-        epObj = show.getEpisode(result[b"season"], result[b"episode"])
+        epObj = show.getEpisode(result["season"], result["episode"])
         epObj.wantedQuality = [i for i in all_qualities if i > cur_quality and i != common.Quality.UNKNOWN]
         wanted.append(epObj)
 
@@ -531,7 +531,7 @@ def searchProviders(show, episodes, manualSearch=False, downCurQuality=False):  
                     seasonQual], logger.DEBUG)
 
             main_db_con = db.DBConnection()
-            allEps = [int(x[b"episode"])
+            allEps = [int(x["episode"])
                       for x in main_db_con.select("SELECT episode FROM tv_episodes WHERE showid = ? AND ( season IN ( " + ','.join(searchedSeasons) + " ) )",
                                                   [show.indexerid])]
 

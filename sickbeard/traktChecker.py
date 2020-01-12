@@ -189,15 +189,15 @@ class TraktChecker(object):
                 trakt_data = []
 
                 for cur_episode in episodes:
-                    trakt_id = sickbeard.indexerApi(cur_episode[b"indexer"]).config[b'trakt_id']
+                    trakt_id = sickbeard.indexerApi(cur_episode["indexer"]).config['trakt_id']
 
-                    if self._checkInList(trakt_id, str(cur_episode[b"showid"]), str(cur_episode[b"season"]), str(cur_episode[b"episode"]), List='Collection'):
-                        if cur_episode[b"location"] == '':
+                    if self._checkInList(trakt_id, str(cur_episode["showid"]), str(cur_episode["season"]), str(cur_episode["episode"]), List='Collection'):
+                        if cur_episode["location"] == '':
                             logger.log("Removing Episode {show} {ep} from collection".format(
-                                show=cur_episode[b"show_name"], ep=episode_num(cur_episode[b"season"], cur_episode[b"episode"])), logger.DEBUG
+                                show=cur_episode["show_name"], ep=episode_num(cur_episode["season"], cur_episode["episode"])), logger.DEBUG
                             )
-                            trakt_data.append((cur_episode[b"showid"], cur_episode[b"indexer"], cur_episode[b"show_name"], cur_episode[b"startyear"],
-                                               cur_episode[b"season"], cur_episode[b"episode"]))
+                            trakt_data.append((cur_episode["showid"], cur_episode["indexer"], cur_episode["show_name"], cur_episode["startyear"],
+                                               cur_episode["season"], cur_episode["episode"]))
 
                 if trakt_data:
                     try:
@@ -221,14 +221,14 @@ class TraktChecker(object):
                 trakt_data = []
 
                 for cur_episode in episodes:
-                    trakt_id = sickbeard.indexerApi(cur_episode[b"indexer"]).config['trakt_id']
+                    trakt_id = sickbeard.indexerApi(cur_episode["indexer"]).config['trakt_id']
 
-                    if not self._checkInList(trakt_id, str(cur_episode[b"showid"]), str(cur_episode[b"season"]), str(cur_episode[b"episode"]), List='Collection'):
+                    if not self._checkInList(trakt_id, str(cur_episode["showid"]), str(cur_episode["season"]), str(cur_episode["episode"]), List='Collection'):
                         logger.log("Adding Episode {show} {ep} to collection".format
-                                   (show=cur_episode[b"show_name"],
-                                    ep=episode_num(cur_episode[b"season"], cur_episode[b"episode"])),
+                                   (show=cur_episode["show_name"],
+                                    ep=episode_num(cur_episode["season"], cur_episode["episode"])),
                                    logger.DEBUG)
-                        trakt_data.append((cur_episode[b"showid"], cur_episode[b"indexer"], cur_episode[b"show_name"], cur_episode[b"startyear"], cur_episode[b"season"], cur_episode[b"episode"]))
+                        trakt_data.append((cur_episode["showid"], cur_episode["indexer"], cur_episode["show_name"], cur_episode["startyear"], cur_episode["season"], cur_episode["episode"]))
 
                 if trakt_data:
                     try:
@@ -267,15 +267,15 @@ class TraktChecker(object):
                 trakt_data = []
 
                 for cur_episode in episodes:
-                    trakt_id = sickbeard.indexerApi(cur_episode[b"indexer"]).config['trakt_id']
+                    trakt_id = sickbeard.indexerApi(cur_episode["indexer"]).config['trakt_id']
 
-                    if self._checkInList(trakt_id, str(cur_episode[b"showid"]), str(cur_episode[b"season"]), str(cur_episode[b"episode"])):
-                        if cur_episode[b"status"] not in Quality.SNATCHED + Quality.SNATCHED_PROPER + [UNKNOWN] + [WANTED]:
+                    if self._checkInList(trakt_id, str(cur_episode["showid"]), str(cur_episode["season"]), str(cur_episode["episode"])):
+                        if cur_episode["status"] not in Quality.SNATCHED + Quality.SNATCHED_PROPER + [UNKNOWN] + [WANTED]:
                             logger.log("Removing Episode {show} {ep} from watchlist".format
-                                       (show=cur_episode[b"show_name"],
-                                        ep=episode_num(cur_episode[b"season"], cur_episode[b"episode"])),
+                                       (show=cur_episode["show_name"],
+                                        ep=episode_num(cur_episode["season"], cur_episode["episode"])),
                                        logger.DEBUG)
-                            trakt_data.append((cur_episode[b"showid"], cur_episode[b"indexer"], cur_episode[b"show_name"], cur_episode[b"startyear"], cur_episode[b"season"], cur_episode[b"episode"]))
+                            trakt_data.append((cur_episode["showid"], cur_episode["indexer"], cur_episode["show_name"], cur_episode["startyear"], cur_episode["season"], cur_episode["episode"]))
 
                 if trakt_data:
                     try:
@@ -299,15 +299,15 @@ class TraktChecker(object):
                 trakt_data = []
 
                 for cur_episode in episodes:
-                    trakt_id = sickbeard.indexerApi(cur_episode[b"indexer"]).config['trakt_id']
+                    trakt_id = sickbeard.indexerApi(cur_episode["indexer"]).config['trakt_id']
 
-                    if not self._checkInList(trakt_id, str(cur_episode[b"showid"]), str(cur_episode[b"season"]), str(cur_episode[b"episode"])):
+                    if not self._checkInList(trakt_id, str(cur_episode["showid"]), str(cur_episode["season"]), str(cur_episode["episode"])):
                         logger.log("Adding Episode {show} {ep} to watchlist".format
-                                   (show=cur_episode[b"show_name"],
-                                    ep=episode_num(cur_episode[b"season"], cur_episode[b"episode"])),
+                                   (show=cur_episode["show_name"],
+                                    ep=episode_num(cur_episode["season"], cur_episode["episode"])),
                                    logger.DEBUG)
-                        trakt_data.append((cur_episode[b"showid"], cur_episode[b"indexer"], cur_episode[b"show_name"], cur_episode[b"startyear"], cur_episode[b"season"],
-                                           cur_episode[b"episode"]))
+                        trakt_data.append((cur_episode["showid"], cur_episode["indexer"], cur_episode["show_name"], cur_episode["startyear"], cur_episode["season"],
+                                           cur_episode["episode"]))
 
                 if trakt_data:
                     try:

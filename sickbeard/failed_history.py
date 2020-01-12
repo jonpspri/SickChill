@@ -57,24 +57,24 @@ def logFailed(release):
             "Release not found in snatch history.", logger.WARNING)
     elif len(sql_results) > 1:
         logger.log("Multiple logged snatches found for release", logger.WARNING)
-        sizes = len(set(x[b"size"] for x in sql_results))
-        providers = len(set(x[b"provider"] for x in sql_results))
+        sizes = len(set(x["size"] for x in sql_results))
+        providers = len(set(x["provider"] for x in sql_results))
         if sizes == 1:
             logger.log("However, they're all the same size. Continuing with found size.", logger.WARNING)
-            size = sql_results[0][b"size"]
+            size = sql_results[0]["size"]
         else:
             logger.log(
                 "They also vary in size. Deleting the logged snatches and recording this release with no size/provider",
                 logger.WARNING)
             for result in sql_results:
-                deleteLoggedSnatch(result[b"release"], result[b"size"], result[b"provider"])
+                deleteLoggedSnatch(result["release"], result["size"], result["provider"])
 
         if providers == 1:
             logger.log("They're also from the same provider. Using it as well.")
-            provider = sql_results[0][b"provider"]
+            provider = sql_results[0]["provider"]
     else:
-        size = sql_results[0][b"size"]
-        provider = sql_results[0][b"provider"]
+        size = sql_results[0]["size"]
+        provider = sql_results[0]["provider"]
 
     if not hasFailed(release, size, provider):
         failed_db_con = db.DBConnection('failed.db')
@@ -122,14 +122,14 @@ def revertEpisode(epObj):
     sql_results = failed_db_con.select("SELECT episode, old_status FROM history WHERE showid=? AND season=?",
                                        [epObj.show.indexerid, epObj.season])
 
-    history_eps = {res[b"episode"]: res for res in sql_results}
+    history_eps = {res["episode"]: res for res in sql_results}
 
     try:
         logger.log("Reverting episode ({0}, {1}): {2}".format(epObj.season, epObj.episode, epObj.name))
         with epObj.lock:
             if epObj.episode in history_eps:
                 logger.log("Found in history")
-                epObj.status = history_eps[epObj.episode][b'old_status']
+                epObj.status = history_eps[epObj.episode]['old_status']
             else:
                 logger.log("Episode don't have a previous snatched status to revert. Setting it back to WANTED",
                            logger.DEBUG)
@@ -232,15 +232,15 @@ def findRelease(epObj):
                                    [epObj.show.indexerid, epObj.season, epObj.episode])
 
     for result in results:
-        release = str(result[b"release"])
-        provider = str(result[b"provider"])
-        date = result[b"date"]
+        release = str(result["release"])
+        provider = str(result["provider"])
+        date = result["date"]
 
         # Clear any incomplete snatch records for this release if any exist
         failed_db_con.action("DELETE FROM history WHERE release=? AND date!=?", [release, date])
 
         # Found a previously failed release
-        logger.log("Failed release found for season ({0}): ({1})".format(epObj.season, result[b"release"]), logger.DEBUG)
+        logger.log("Failed release found for season ({0}): ({1})".format(epObj.season, result["release"]), logger.DEBUG)
         return release, provider
 
     # Release was not found

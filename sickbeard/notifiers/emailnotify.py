@@ -43,13 +43,13 @@ class Notifier(object):
     def test_notify(self, host, port, smtp_from, use_tls, user, pwd, to):  # pylint: disable=too-many-arguments
         msg = MIMEText('This is a test message from SickChill.  If you\'re reading this, the test succeeded.')
         if sickbeard.EMAIL_SUBJECT:
-            msg[b'Subject'] = '[TEST] ' + sickbeard.EMAIL_SUBJECT
+            msg['Subject'] = '[TEST] ' + sickbeard.EMAIL_SUBJECT
         else:
-            msg[b'Subject'] = 'SickChill: Test Message'
+            msg['Subject'] = 'SickChill: Test Message'
 
-        msg[b'From'] = smtp_from
-        msg[b'To'] = to
-        msg[b'Date'] = formatdate(localtime=True)
+        msg['From'] = smtp_from
+        msg['To'] = to
+        msg['Date'] = formatdate(localtime=True)
         return self._sendmail(host, port, smtp_from, use_tls, user, pwd, [to], msg, True)
 
     def notify_snatch(self, ep_name, title='Snatched:'):  # pylint: disable=unused-argument
@@ -87,12 +87,12 @@ class Notifier(object):
                         msg = MIMEText('Episode Snatched')
 
                 if sickbeard.EMAIL_SUBJECT:
-                    msg[b'Subject'] = '[SN] ' + sickbeard.EMAIL_SUBJECT
+                    msg['Subject'] = '[SN] ' + sickbeard.EMAIL_SUBJECT
                 else:
-                    msg[b'Subject'] = 'Snatched: ' + ep_name
-                msg[b'From'] = sickbeard.EMAIL_FROM
-                msg[b'To'] = ','.join(to)
-                msg[b'Date'] = formatdate(localtime=True)
+                    msg['Subject'] = 'Snatched: ' + ep_name
+                msg['From'] = sickbeard.EMAIL_FROM
+                msg['To'] = ','.join(to)
+                msg['Date'] = formatdate(localtime=True)
                 if self._sendmail(sickbeard.EMAIL_HOST, sickbeard.EMAIL_PORT, sickbeard.EMAIL_FROM, sickbeard.EMAIL_TLS,
                                   sickbeard.EMAIL_USER, sickbeard.EMAIL_PASSWORD, to, msg):
                     logger.log('Snatch notification sent to [{0}] for "{1}"'.format(to, ep_name), logger.DEBUG)
@@ -134,12 +134,12 @@ class Notifier(object):
                         msg = MIMEText('Episode Downloaded')
 
                 if sickbeard.EMAIL_SUBJECT:
-                    msg[b'Subject'] = '[DL] ' + sickbeard.EMAIL_SUBJECT
+                    msg['Subject'] = '[DL] ' + sickbeard.EMAIL_SUBJECT
                 else:
-                    msg[b'Subject'] = 'Downloaded: ' + ep_name
-                msg[b'From'] = sickbeard.EMAIL_FROM
-                msg[b'To'] = ','.join(to)
-                msg[b'Date'] = formatdate(localtime=True)
+                    msg['Subject'] = 'Downloaded: ' + ep_name
+                msg['From'] = sickbeard.EMAIL_FROM
+                msg['To'] = ','.join(to)
+                msg['Date'] = formatdate(localtime=True)
                 if self._sendmail(sickbeard.EMAIL_HOST, sickbeard.EMAIL_PORT, sickbeard.EMAIL_FROM, sickbeard.EMAIL_TLS,
                                   sickbeard.EMAIL_USER, sickbeard.EMAIL_PASSWORD, to, msg):
                     logger.log('Download notification sent to [{0}] for "{1}"'.format(to, ep_name), logger.DEBUG)
@@ -181,12 +181,12 @@ class Notifier(object):
                         msg = MIMEText('Episode Postprocessed')
 
                 if sickbeard.EMAIL_SUBJECT:
-                    msg[b'Subject'] = '[PP] ' + sickbeard.EMAIL_SUBJECT
+                    msg['Subject'] = '[PP] ' + sickbeard.EMAIL_SUBJECT
                 else:
-                    msg[b'Subject'] = 'Postprocessed: ' + ep_name
-                msg[b'From'] = sickbeard.EMAIL_FROM
-                msg[b'To'] = ','.join(to)
-                msg[b'Date'] = formatdate(localtime=True)
+                    msg['Subject'] = 'Postprocessed: ' + ep_name
+                msg['From'] = sickbeard.EMAIL_FROM
+                msg['To'] = ','.join(to)
+                msg['Date'] = formatdate(localtime=True)
                 if self._sendmail(sickbeard.EMAIL_HOST, sickbeard.EMAIL_PORT, sickbeard.EMAIL_FROM, sickbeard.EMAIL_TLS,
                                   sickbeard.EMAIL_USER, sickbeard.EMAIL_PASSWORD, to, msg):
                     logger.log('Postprocess notification sent to [{0}] for "{1}"'.format(to, ep_name), logger.DEBUG)
@@ -229,11 +229,11 @@ class Notifier(object):
                         msg = MIMEText('Episode Subtitle Downloaded')
 
                 if sickbeard.EMAIL_SUBJECT:
-                    msg[b'Subject'] = '[ST] ' + sickbeard.EMAIL_SUBJECT
+                    msg['Subject'] = '[ST] ' + sickbeard.EMAIL_SUBJECT
                 else:
-                    msg[b'Subject'] = lang + ' Subtitle Downloaded: ' + ep_name
-                msg[b'From'] = sickbeard.EMAIL_FROM
-                msg[b'To'] = ','.join(to)
+                    msg['Subject'] = lang + ' Subtitle Downloaded: ' + ep_name
+                msg['From'] = sickbeard.EMAIL_FROM
+                msg['To'] = ','.join(to)
                 if self._sendmail(sickbeard.EMAIL_HOST, sickbeard.EMAIL_PORT, sickbeard.EMAIL_FROM, sickbeard.EMAIL_TLS,
                                   sickbeard.EMAIL_USER, sickbeard.EMAIL_PASSWORD, to, msg):
                     logger.log('Download notification sent to [{0}] for "{1}"'.format(to, ep_name), logger.DEBUG)
@@ -271,10 +271,10 @@ class Notifier(object):
                     except Exception:
                         msg = MIMEText('SickChill updated')
 
-                msg[b'Subject'] = 'Updated: {0}'.format(new_version)
-                msg[b'From'] = sickbeard.EMAIL_FROM
-                msg[b'To'] = ','.join(to)
-                msg[b'Date'] = formatdate(localtime=True)
+                msg['Subject'] = 'Updated: {0}'.format(new_version)
+                msg['From'] = sickbeard.EMAIL_FROM
+                msg['To'] = ','.join(to)
+                msg['Date'] = formatdate(localtime=True)
                 if self._sendmail(sickbeard.EMAIL_HOST, sickbeard.EMAIL_PORT, sickbeard.EMAIL_FROM, sickbeard.EMAIL_TLS,
                                   sickbeard.EMAIL_USER, sickbeard.EMAIL_PASSWORD, to, msg):
                     logger.log('Update notification sent to [{0}]'.format(to), logger.DEBUG)
@@ -312,10 +312,10 @@ class Notifier(object):
                     except Exception:
                         msg = MIMEText('SickChill Remote Login')
 
-                msg[b'Subject'] = 'New Login from IP: {0}'.format(ipaddress)
-                msg[b'From'] = sickbeard.EMAIL_FROM
-                msg[b'To'] = ','.join(to)
-                msg[b'Date'] = formatdate(localtime=True)
+                msg['Subject'] = 'New Login from IP: {0}'.format(ipaddress)
+                msg['From'] = sickbeard.EMAIL_FROM
+                msg['To'] = ','.join(to)
+                msg['Date'] = formatdate(localtime=True)
                 if self._sendmail(sickbeard.EMAIL_HOST, sickbeard.EMAIL_PORT, sickbeard.EMAIL_FROM, sickbeard.EMAIL_TLS,
                                   sickbeard.EMAIL_USER, sickbeard.EMAIL_PASSWORD, to, msg):
                     logger.log('Login notification sent to [{0}]'.format(to), logger.DEBUG)
@@ -337,14 +337,14 @@ class Notifier(object):
         if show is not None:
             for s in show:
                 for subs in main_db_con.select('SELECT notify_list FROM tv_shows WHERE show_name = ?', (s,)):
-                    if subs[b'notify_list']:
-                        if subs[b'notify_list'][0] == '{':
-                            entries = dict(ast.literal_eval(subs[b'notify_list']))
-                            for addr in entries[b'emails'].split(','):
+                    if subs['notify_list']:
+                        if subs['notify_list'][0] == '{':
+                            entries = dict(ast.literal_eval(subs['notify_list']))
+                            for addr in entries['emails'].split(','):
                                 if len(addr.strip()) > 0:
                                     addrs.append(addr)
                         else:                                           # Legacy
-                            for addr in subs[b'notify_list'].split(','):
+                            for addr in subs['notify_list'].split(','):
                                 if len(addr.strip()) > 0:
                                     addrs.append(addr)
 

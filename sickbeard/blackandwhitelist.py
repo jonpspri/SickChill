@@ -100,7 +100,7 @@ class BlackAndWhiteList(object):
             return []
         groups = []
         for result in sql_results:
-            groups.append(result[b'keyword'])
+            groups.append(result['keyword'])
 
         logger.log('BWL: {id} loaded keywords from {table}: {groups}'.format
                    (id=self.show_id, table=table, groups=groups), logger.DEBUG)
@@ -166,8 +166,8 @@ def short_group_names(groups):
                 logger.log('Failed while loading group from AniDB. Trying next group', logger.DEBUG)
             else:
                 for line in group.datalines:
-                    if line[b'shortname']:
-                        short_group_list.append(line[b'shortname'])
+                    if line['shortname']:
+                        short_group_list.append(line['shortname'])
                     else:
                         if groupName not in short_group_list:
                             short_group_list.append(groupName)

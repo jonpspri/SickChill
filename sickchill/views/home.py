@@ -167,9 +167,9 @@ class Home(WebRoot):
         show_stat = {}
         max_download_count = 1000
         for cur_result in sql_result:
-            show_stat[cur_result[b'showid']] = cur_result
-            if cur_result[b'ep_total'] > max_download_count:
-                max_download_count = cur_result[b'ep_total']
+            show_stat[cur_result['showid']] = cur_result
+            if cur_result['ep_total'] > max_download_count:
+                max_download_count = cur_result['ep_total']
 
         max_download_count *= 100
 
@@ -518,16 +518,16 @@ class Home(WebRoot):
         size = 0
         for r in rows:
             NotifyList = {'emails': '', 'prowlAPIs': ''}
-            if r[b'notify_list'] and len(r[b'notify_list']) > 0:
+            if r['notify_list'] and len(r['notify_list']) > 0:
                 # First, handle legacy format (emails only)
-                if not r[b'notify_list'][0] == '{':
-                    NotifyList['emails'] = r[b'notify_list']
+                if not r['notify_list'][0] == '{':
+                    NotifyList['emails'] = r['notify_list']
                 else:
-                    NotifyList = dict(ast.literal_eval(r[b'notify_list']))
+                    NotifyList = dict(ast.literal_eval(r['notify_list']))
 
-            data[r[b'show_id']] = {
-                'id': r[b'show_id'],
-                'name': r[b'show_name'],
+            data[r['show_id']] = {
+                'id': r['show_id'],
+                'name': r['show_name'],
                 'list': NotifyList['emails'],
                 'prowl_notify_list': NotifyList['prowlAPIs']
             }
@@ -543,12 +543,12 @@ class Home(WebRoot):
 
         # Get current data
         for subs in main_db_con.select("SELECT notify_list FROM tv_shows WHERE show_id = ?", [show]):
-            if subs[b'notify_list'] and len(subs[b'notify_list']) > 0:
+            if subs['notify_list'] and len(subs['notify_list']) > 0:
                 # First, handle legacy format (emails only)
-                if not subs[b'notify_list'][0] == '{':
-                    entries['emails'] = subs[b'notify_list']
+                if not subs['notify_list'][0] == '{':
+                    entries['emails'] = subs['notify_list']
                 else:
-                    entries = dict(ast.literal_eval(subs[b'notify_list']))
+                    entries = dict(ast.literal_eval(subs['notify_list']))
 
         if emails:
             entries['emails'] = emails
@@ -816,7 +816,7 @@ class Home(WebRoot):
                                    'requires': self.haveEMBY(),
                                    'icon': 'menu-icon-emby'
                                    })
-                if seasonResults and int(seasonResults[-1][b"season"]) == 0:
+                if seasonResults and int(seasonResults[-1]["season"]) == 0:
                     if sickbeard.DISPLAY_SHOW_SPECIALS:
                         # noinspection PyPep8
                         submenu.append({
@@ -854,9 +854,9 @@ class Home(WebRoot):
         epCats = {}
 
         for curResult in sql_results:
-            curEpCat = show_obj.getOverview(curResult[b"status"])
+            curEpCat = show_obj.getOverview(curResult["status"])
             if curEpCat:
-                epCats[str(curResult[b"season"]) + "x" + str(curResult[b"episode"])] = curEpCat
+                epCats[str(curResult["season"]) + "x" + str(curResult["episode"])] = curEpCat
                 epCounts[curEpCat] += 1
 
         if sickbeard.ANIME_SPLIT_HOME:
@@ -918,7 +918,7 @@ class Home(WebRoot):
         main_db_con = db.DBConnection()
         result = main_db_con.select_one(
             "SELECT description FROM tv_episodes WHERE showid = ? AND season = ? AND episode = ?", (int(show), int(season), int(episode)))
-        return result[b'description'] if result else 'Episode not found.'
+        return result['description'] if result else 'Episode not found.'
 
     @staticmethod
     def sceneExceptions(show):
@@ -1518,14 +1518,14 @@ class Home(WebRoot):
                 continue
             related_eps_result = main_db_con.select(
                 "SELECT season, episode FROM tv_episodes WHERE location = ? AND episode != ?",
-                [ep_result[0][b"location"], epInfo[1]]
+                [ep_result[0]["location"], epInfo[1]]
             )
 
             root_ep_obj = show_obj.getEpisode(epInfo[0], epInfo[1])
             root_ep_obj.relatedEps = []
 
             for cur_related_ep in related_eps_result:
-                related_ep_obj = show_obj.getEpisode(cur_related_ep[b"season"], cur_related_ep[b"episode"])
+                related_ep_obj = show_obj.getEpisode(cur_related_ep["season"], cur_related_ep["episode"])
                 if related_ep_obj not in root_ep_obj.relatedEps:
                     root_ep_obj.relatedEps.append(related_ep_obj)
 
@@ -1736,8 +1736,8 @@ class Home(WebRoot):
             ep_obj, error_msg = self._getEpisode(show, forSeason, forEpisode)
 
         if error_msg or not ep_obj:
-            result[b'success'] = False
-            result[b'errorMessage'] = error_msg
+            result['success'] = False
+            result['errorMessage'] = error_msg
         elif show_obj.is_anime:
             logger.log("setAbsoluteSceneNumbering for {0} from {1} to {2}".format(show, forAbsolute, sceneAbsolute), logger.DEBUG)
 
@@ -1766,15 +1766,15 @@ class Home(WebRoot):
         if show_obj.is_anime:
             sn = get_scene_absolute_numbering(show, indexer, forAbsolute)
             if sn:
-                result[b'sceneAbsolute'] = sn
+                result['sceneAbsolute'] = sn
             else:
-                result[b'sceneAbsolute'] = None
+                result['sceneAbsolute'] = None
         else:
             sn = get_scene_numbering(show, indexer, forSeason, forEpisode)
             if sn:
-                (result[b'sceneSeason'], result[b'sceneEpisode']) = sn
+                (result['sceneSeason'], result['sceneEpisode']) = sn
             else:
-                (result[b'sceneSeason'], result[b'sceneEpisode']) = (None, None)
+                (result['sceneSeason'], result['sceneEpisode']) = (None, None)
 
         return json.dumps(result)
 
